@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: smartjewel-backend-deployment
+  labels:
+    app: smartjewel-backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: smartjewel-backend
+  template:
+    metadata:
+      labels:
+        app: smartjewel-backend
+    spec:
+      containers:
+        - name: backend
+          image: smartjewel/backend:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: smartjewel-config
+            - secretRef:
+                name: smartjewel-secret
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "250m"
+            limits:
+              memory: "1Gi"
+              cpu: "1000m"
+          livenessProbe:
+            httpGet:
+              path: /api/v1/catalog
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 15
+          readinessProbe:
+            httpGet:
+              path: /api/v1/catalog
+              port: 8080
+            initialDelaySeconds: 20
+            periodSeconds: 10

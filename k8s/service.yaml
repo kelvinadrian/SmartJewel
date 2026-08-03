@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: smartjewel-backend-service
+  labels:
+    app: smartjewel-backend
+spec:
+  type: ClusterIP
+  selector:
+    app: smartjewel-backend
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080

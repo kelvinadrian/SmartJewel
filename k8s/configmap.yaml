@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: smartjewel-config
+  labels:
+    app: smartjewel-backend
+data:
+  DB_URL: "jdbc:postgresql://aws-0-sa-east-1.pooler.supabase.com:6543/postgres"
+  SUPABASE_URL: "https://your-project.supabase.co"
+  SUPABASE_STORAGE_BUCKET: "product-images"
