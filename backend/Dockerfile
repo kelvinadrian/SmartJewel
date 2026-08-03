@@ -15,13 +15,16 @@ WORKDIR /app
 
 # Criar usuário não-root por segurança no Linux
 RUN groupadd -r spring && useradd -r -g spring spring
+
+# AJUSTE AQUI: Copia o JAR já dando a permissão para o usuário spring
+COPY --from=builder --chown=spring:spring /build/target/*.jar app.jar
+
+# Define o usuário após a cópia do arquivo
 USER spring:spring
 
-# Copiar a aplicação compilada a partir do estágio de build
-COPY --from=builder /build/target/*.jar app.jar
-
-# Expor a porta 8080 ( Render injeta a variável PORT )
+# Expor a porta 8080
 EXPOSE 8080
 
-# Comando de inicialização otimizado para Linux
+# Comando de inicialização
 ENTRYPOINT ["java", "-Djava.security.egd=file:/dev/./urandom", "-jar", "app.jar"]
+
