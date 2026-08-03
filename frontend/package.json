@@ -3,8 +3,14 @@
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
-    "start": "ng serve",
-    "build": "ng build",
+    "start": "ng serve catalog-app",
+    "start:admin": "ng serve admin-app",
+    "start:catalog": "ng serve catalog-app",
+    "build": "npm run build:all",
+    "build:core": "ng build shared-core",
+    "build:admin": "ng build admin-app",
+    "build:catalog": "ng build catalog-app",
+    "build:all": "ng build shared-core && ng build admin-app && ng build catalog-app",
     "watch": "ng build --watch --configuration development",
     "test": "ng test"
   },
@@ -35,6 +41,7 @@
     "karma-coverage": "~2.2.0",
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
+    "ng-packagr": "^18.2.0",
     "typescript": "~5.5.2"
   }
 }

@@ -1,0 +1,56 @@
+// Petroleum Blue / Teal Theme for SmartJewel Admin App
+@use '@angular/material' as mat;
+
+@include mat.core();
+
+// Paleta Azul Petróleo / Teal personalizada
+$petroleum-teal: (
+  50: #e0f2f1,
+  100: #b2dfdb,
+  200: #80cbc4,
+  300: #4db6ac,
+  400: #26a69a,
+  500: #009688,
+  600: #00897b,
+  700: #005c53, // Azul Petróleo Principal
+  800: #042940, // Azul Petróleo Escuro
+  900: #00251a,
+  contrast: (
+    50: rgba(0,0,0, 0.87),
+    100: rgba(0,0,0, 0.87),
+    200: rgba(0,0,0, 0.87),
+    500: #ffffff,
+    700: #ffffff,
+    800: #ffffff
+  )
+);
+
+$admin-primary: mat.m2-define-palette($petroleum-teal, 700);
+$admin-accent: mat.m2-define-palette(mat.$m2-pink-palette, A200);
+
+$admin-theme: mat.m2-define-dark-theme((
+  color: (
+    primary: $admin-primary,
+    accent: $admin-accent
+  )
+));
+
+@include mat.all-component-themes($admin-theme);
+
+/* Styling Globais e Dark Mode Glassmorphism */
+html, body {
+  height: 100%;
+  margin: 0;
+  font-family: 'Outfit', 'Roboto', 'Segoe UI', sans-serif;
+  background-color: #04121e;
+  color: #f8fafc;
+}
+
+.glass-card {
+  background: rgba(4, 41, 64, 0.55);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+}

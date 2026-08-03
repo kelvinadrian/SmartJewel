@@ -5,32 +5,71 @@
     "packageManager": "npm"
   },
   "newProjectRoot": "projects",
+  "defaultProject": "catalog-app",
   "projects": {
-    "frontend": {
+    "shared-core": {
+      "projectType": "library",
+      "root": "projects/shared-core",
+      "sourceRoot": "projects/shared-core/src",
+      "prefix": "core",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-angular:ng-packagr",
+          "options": {
+            "project": "projects/shared-core/ng-package.json"
+          },
+          "configurations": {
+            "production": {
+              "tsConfig": "projects/shared-core/tsconfig.lib.prod.json"
+            },
+            "development": {
+              "tsConfig": "projects/shared-core/tsconfig.lib.json"
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "tsConfig": "projects/shared-core/tsconfig.spec.json",
+            "polyfills": [
+              "zone.js",
+              "zone.js/testing"
+            ]
+          }
+        }
+      }
+    },
+    "admin-app": {
       "projectType": "application",
-      "schematics": {},
-      "root": "",
-      "sourceRoot": "src",
+      "schematics": {
+        "@schematics/angular:component": {
+          "style": "scss"
+        }
+      },
+      "root": "projects/admin-app",
+      "sourceRoot": "projects/admin-app/src",
       "prefix": "app",
       "architect": {
         "build": {
           "builder": "@angular-devkit/build-angular:application",
           "options": {
-            "outputPath": "dist/frontend",
-            "index": "src/index.html",
-            "browser": "src/main.ts",
+            "outputPath": "dist/admin-app",
+            "index": "projects/admin-app/src/index.html",
+            "browser": "projects/admin-app/src/main.ts",
             "polyfills": [
               "zone.js"
             ],
-            "tsConfig": "tsconfig.app.json",
+            "tsConfig": "projects/admin-app/tsconfig.app.json",
+            "inlineStyleLanguage": "scss",
             "assets": [
               {
                 "glob": "**/*",
-                "input": "public"
+                "input": "projects/admin-app/public"
               }
             ],
             "styles": [
-              "src/styles.css"
+              "projects/admin-app/src/styles.scss"
             ],
             "scripts": []
           },
@@ -62,10 +101,10 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "frontend:build:production"
+              "buildTarget": "admin-app:build:production"
             },
             "development": {
-              "buildTarget": "frontend:build:development"
+              "buildTarget": "admin-app:build:development"
             }
           },
           "defaultConfiguration": "development"
@@ -80,15 +119,111 @@
               "zone.js",
               "zone.js/testing"
             ],
-            "tsConfig": "tsconfig.spec.json",
+            "tsConfig": "projects/admin-app/tsconfig.spec.json",
+            "inlineStyleLanguage": "scss",
             "assets": [
               {
                 "glob": "**/*",
-                "input": "public"
+                "input": "projects/admin-app/public"
               }
             ],
             "styles": [
-              "src/styles.css"
+              "projects/admin-app/src/styles.scss"
+            ],
+            "scripts": []
+          }
+        }
+      }
+    },
+    "catalog-app": {
+      "projectType": "application",
+      "schematics": {
+        "@schematics/angular:component": {
+          "style": "scss"
+        }
+      },
+      "root": "projects/catalog-app",
+      "sourceRoot": "projects/catalog-app/src",
+      "prefix": "app",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-angular:application",
+          "options": {
+            "outputPath": "dist/catalog-app",
+            "index": "projects/catalog-app/src/index.html",
+            "browser": "projects/catalog-app/src/main.ts",
+            "polyfills": [
+              "zone.js"
+            ],
+            "tsConfig": "projects/catalog-app/tsconfig.app.json",
+            "inlineStyleLanguage": "scss",
+            "assets": [
+              {
+                "glob": "**/*",
+                "input": "projects/catalog-app/public"
+              }
+            ],
+            "styles": [
+              "projects/catalog-app/src/styles.scss"
+            ],
+            "scripts": []
+          },
+          "configurations": {
+            "production": {
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "500kB",
+                  "maximumError": "1MB"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "2kB",
+                  "maximumError": "4kB"
+                }
+              ],
+              "outputHashing": "all"
+            },
+            "development": {
+              "optimization": false,
+              "extractLicenses": false,
+              "sourceMap": true
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "serve": {
+          "builder": "@angular-devkit/build-angular:dev-server",
+          "configurations": {
+            "production": {
+              "buildTarget": "catalog-app:build:production"
+            },
+            "development": {
+              "buildTarget": "catalog-app:build:development"
+            }
+          },
+          "defaultConfiguration": "development"
+        },
+        "extract-i18n": {
+          "builder": "@angular-devkit/build-angular:extract-i18n"
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "polyfills": [
+              "zone.js",
+              "zone.js/testing"
+            ],
+            "tsConfig": "projects/catalog-app/tsconfig.spec.json",
+            "inlineStyleLanguage": "scss",
+            "assets": [
+              {
+                "glob": "**/*",
+                "input": "projects/catalog-app/public"
+              }
+            ],
+            "styles": [
+              "projects/catalog-app/src/styles.scss"
             ],
             "scripts": []
           }
