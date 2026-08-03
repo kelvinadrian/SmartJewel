@@ -1,4 +1,4 @@
-name: SmartJewel CI/CD Pipeline
+name: SmartJewel Monorepo CI/CD Pipeline
 
 on:
   push:
@@ -8,10 +8,10 @@ on:
 
 jobs:
   # -------------------------------------------------------------
-  # JOB 1: Continuous Integration (CI) - Build & Unit Tests
+  # JOB 1: Continuous Integration (CI) - Backend (Spring Boot)
   # -------------------------------------------------------------
-  ci:
-    name: Continuous Integration (Build & Test)
+  ci-backend:
+    name: CI - Backend (Java 21 & Spring Boot)
     runs-on: ubuntu-latest
 
     steps:
@@ -25,17 +25,41 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
 
-      - name: Compilar e Executar Testes Unitários
+      - name: Compilar e Executar Testes Unitários do Backend
         run: |
           cd backend
           mvn clean test
 
   # -------------------------------------------------------------
-  # JOB 2: Continuous Deployment (CD) - Docker & Kubernetes Update
+  # JOB 2: Continuous Integration (CI) - Frontend (Angular)
+  # -------------------------------------------------------------
+  ci-frontend:
+    name: CI - Frontend (Angular & Node.js)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Código do Repositório
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js (v20)
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Instalar Dependências e Compilar Angular Frontend
+        run: |
+          cd frontend
+          npm ci || npm install
+          npm run build
+
+  # -------------------------------------------------------------
+  # JOB 3: Continuous Deployment (CD) - Docker & Kubernetes Update
   # -------------------------------------------------------------
   cd:
     name: Continuous Deployment (Docker Build & Push)
-    needs: ci
+    needs: [ ci-backend, ci-frontend ]
     if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
 
@@ -56,8 +80,11 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Extrair tags e labels para Docker
-        id: meta
+      # ---------------------------------------------------------
+      # Build & Push BACKEND Docker Image
+      # ---------------------------------------------------------
+      - name: Extrair Tags e Labels para Backend
+        id: meta-backend
         uses: docker/metadata-action@v5
         with:
           images: ghcr.io/${{ github.repository_owner }}/smartjewel-backend
@@ -65,18 +92,49 @@ jobs:
             type=raw,value=latest
             type=sha,format=short
 
-      - name: Build e Push da Imagem Docker
+      - name: Build e Push da Imagem Docker do Backend
         uses: docker/build-push-action@v6
         with:
           context: ./backend
           file: ./backend/Dockerfile
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+          tags: ${{ steps.meta-backend.outputs.tags }}
+          labels: ${{ steps.meta-backend.outputs.labels }}
 
-      - name: Atualizar Tag da Imagem no Manifesto Kubernetes
+      # ---------------------------------------------------------
+      # Build & Push FRONTEND Docker Image
+      # ---------------------------------------------------------
+      - name: Extrair Tags e Labels para Frontend
+        id: meta-frontend
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository_owner }}/smartjewel-frontend
+          tags: |
+            type=raw,value=latest
+            type=sha,format=short
+
+      - name: Build e Push da Imagem Docker do Frontend
+        uses: docker/build-push-action@v6
+        with:
+          context: ./frontend
+          file: ./frontend/Dockerfile
+          push: true
+          tags: ${{ steps.meta-frontend.outputs.tags }}
+          labels: ${{ steps.meta-frontend.outputs.labels }}
+
+      # ---------------------------------------------------------
+      # Atualizar Tags nos Manifestos Kubernetes
+      # ---------------------------------------------------------
+      - name: Atualizar Tags de Imagem nos Manifestos Kubernetes
         run: |
-          IMAGE_TAG="ghcr.io/${{ github.repository_owner }}/smartjewel-backend:${GITHUB_SHA::7}"
-          echo "Atualizando manifesto k8s/deployment.yaml para a imagem: $IMAGE_TAG"
-          sed -i "s|image: smartjewel/backend:latest|image: $IMAGE_TAG|g" k8s/deployment.yaml
+          BACKEND_TAG="ghcr.io/${{ github.repository_owner }}/smartjewel-backend:${GITHUB_SHA::7}"
+          FRONTEND_TAG="ghcr.io/${{ github.repository_owner }}/smartjewel-frontend:${GITHUB_SHA::7}"
+
+          echo "Atualizando k8s/deployment.yaml para: $BACKEND_TAG"
+          sed -i "s|image: smartjewel/backend:latest|image: $BACKEND_TAG|g" k8s/deployment.yaml
+
+          echo "Atualizando k8s/frontend-deployment.yaml para: $FRONTEND_TAG"
+          sed -i "s|image: smartjewel/frontend:latest|image: $FRONTEND_TAG|g" k8s/frontend-deployment.yaml
+
           cat k8s/deployment.yaml | grep "image:"
+          cat k8s/frontend-deployment.yaml | grep "image:"

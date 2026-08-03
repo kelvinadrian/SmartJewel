@@ -1,6 +1,9 @@
 version: '3.8'
 
 services:
+  # -------------------------------------------------------------
+  # Backend Spring Boot Service
+  # -------------------------------------------------------------
   backend:
     build:
       context: ./backend
@@ -18,4 +21,18 @@ services:
       - SUPABASE_STORAGE_BUCKET=${SUPABASE_STORAGE_BUCKET:-product-images}
     env_file:
       - .env
+    restart: unless-stopped
+
+  # -------------------------------------------------------------
+  # Frontend Angular Service (Nginx)
+  # -------------------------------------------------------------
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: smartjewel-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
     restart: unless-stopped
