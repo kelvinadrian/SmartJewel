@@ -53,3 +53,10 @@ export interface UpdateProductRequest {
 export interface StockAdjustmentRequest {
   quantidade: number;
 }
+
+export interface ImportSummaryResponse {
+  totalProcessed: number;
+  createdCount: number;
+  updatedCount: number;
+  errors: string[];
+}

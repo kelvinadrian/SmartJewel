@@ -14,6 +14,7 @@ import { ProductService } from '../../core/services/product.service';
 import { Product } from '../../core/models/product.model';
 import { ProductFormDialogComponent, ProductDialogData } from './components/product-form-dialog/product-form-dialog.component';
 import { StockDialogComponent, StockDialogData } from './components/stock-dialog/stock-dialog.component';
+import { InventoryImportDialogComponent } from './components/inventory-import-dialog/inventory-import-dialog.component';
 
 @Component({
   selector: 'app-admin',
@@ -40,10 +41,17 @@ import { StockDialogComponent, StockDialogData } from './components/stock-dialog
           <p>Gestão de produtos, fotos e movimentação de estoque de semijoias</p>
         </div>
 
-        <button mat-raised-button color="primary" class="add-btn" (click)="openCreateDialog()">
-          <mat-icon>add</mat-icon>
-          <span>Novo Produto</span>
-        </button>
+        <div class="header-actions">
+          <button mat-stroked-button class="import-btn" (click)="openImportDialog()">
+            <mat-icon>file_upload</mat-icon>
+            <span>Importar Estoque</span>
+          </button>
+
+          <button mat-raised-button color="primary" class="add-btn" (click)="openCreateDialog()">
+            <mat-icon>add</mat-icon>
+            <span>Novo Produto</span>
+          </button>
+        </div>
       </header>
 
       <!-- Filter Toolbar -->
@@ -178,6 +186,23 @@ import { StockDialogComponent, StockDialogData } from './components/stock-dialog
 
     .admin-header p {
       color: #94a3b8;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+    }
+
+    .import-btn {
+      border-color: rgba(255, 255, 255, 0.2) !important;
+      color: #f8fafc !important;
+      height: 44px;
+      border-radius: 10px;
+    }
+
+    .import-btn:hover {
+      background: rgba(255, 255, 255, 0.08) !important;
     }
 
     .add-btn {
@@ -319,6 +344,18 @@ export class AdminComponent implements OnInit, AfterViewInit {
     if (this.dataSource.paginator) {
       this.dataSource.paginator.firstPage();
     }
+  }
+
+  openImportDialog(): void {
+    const dialogRef = this.dialog.open(InventoryImportDialogComponent, {
+      width: '540px'
+    });
+
+    dialogRef.afterClosed().subscribe(refreshNeeded => {
+      if (refreshNeeded) {
+        this.loadProducts();
+      }
+    });
   }
 
   openCreateDialog(): void {

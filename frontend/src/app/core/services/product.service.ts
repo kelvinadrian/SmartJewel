@@ -6,7 +6,8 @@ import {
   Product,
   CreateProductRequest,
   UpdateProductRequest,
-  StockAdjustmentRequest
+  StockAdjustmentRequest,
+  ImportSummaryResponse
 } from '../models/product.model';
 
 @Injectable({
@@ -36,6 +37,12 @@ export class ProductService {
     const formData = new FormData();
     formData.append('file', file);
     return this.http.post<Product>(`${this.apiUrl}/${id}/image`, formData);
+  }
+
+  importInventory(file: File): Observable<ImportSummaryResponse> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http.post<ImportSummaryResponse>(`${this.apiUrl}/import`, formData);
   }
 
   addStock(id: string, quantidade: number): Observable<Product> {
