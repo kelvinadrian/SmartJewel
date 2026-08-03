@@ -1,0 +1,82 @@
+name: SmartJewel CI/CD Pipeline
+
+on:
+  push:
+    branches: [ "master", "main" ]
+  pull_request:
+    branches: [ "master", "main" ]
+
+jobs:
+  # -------------------------------------------------------------
+  # JOB 1: Continuous Integration (CI) - Build & Unit Tests
+  # -------------------------------------------------------------
+  ci:
+    name: Continuous Integration (Build & Test)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Código do Repositório
+        uses: actions/checkout@v4
+
+      - name: Configurar Java JDK 21 (Temurin)
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Compilar e Executar Testes Unitários
+        run: |
+          cd backend
+          mvn clean test
+
+  # -------------------------------------------------------------
+  # JOB 2: Continuous Deployment (CD) - Docker & Kubernetes Update
+  # -------------------------------------------------------------
+  cd:
+    name: Continuous Deployment (Docker Build & Push)
+    needs: ci
+    if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Código do Repositório
+        uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Autenticar no GitHub Container Registry (GHCR)
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extrair tags e labels para Docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository_owner }}/smartjewel-backend
+          tags: |
+            type=raw,value=latest
+            type=sha,format=short
+
+      - name: Build e Push da Imagem Docker
+        uses: docker/build-push-action@v6
+        with:
+          context: ./backend
+          file: ./backend/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+      - name: Atualizar Tag da Imagem no Manifesto Kubernetes
+        run: |
+          IMAGE_TAG="ghcr.io/${{ github.repository_owner }}/smartjewel-backend:${GITHUB_SHA::7}"
+          echo "Atualizando manifesto k8s/deployment.yaml para a imagem: $IMAGE_TAG"
+          sed -i "s|image: smartjewel/backend:latest|image: $IMAGE_TAG|g" k8s/deployment.yaml
+          cat k8s/deployment.yaml | grep "image:"
