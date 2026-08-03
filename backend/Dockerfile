@@ -1,15 +1,15 @@
-# Estágio 1: Build da aplicação com Maven e Java 21/25 JDK
-FROM eclipse-temurin:21-jdk-alpine AS builder
+# Estágio 1: Build da aplicação com Maven 3.9 e Java 21 JDK
+FROM maven:3.9.9-eclipse-temurin-21-alpine AS builder
 WORKDIR /build
 
-# Copiar descritores do Maven e código-fonte
+# Copiar pom.xml e código-fonte
 COPY pom.xml .
 COPY src ./src
 
 # Executar o build gerando o arquivo JAR otimizado
-RUN ./mvnw package -DskipTests || mvn package -DskipTests
+RUN mvn clean package -DskipTests
 
-# Estágio 2: Imagem final leve de execução (JRE)
+# Estágio 2: Imagem final leve de execução (JRE 21)
 FROM eclipse-temurin:21-jre-alpine AS runner
 WORKDIR /app
 
