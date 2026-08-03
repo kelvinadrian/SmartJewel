@@ -24,15 +24,29 @@ services:
     restart: unless-stopped
 
   # -------------------------------------------------------------
-  # Frontend Angular Service (Nginx)
+  # Frontend Admin App Service (Port 8081)
   # -------------------------------------------------------------
-  frontend:
+  frontend-admin:
     build:
       context: ./frontend
-      dockerfile: Dockerfile
-    container_name: smartjewel-frontend
+      dockerfile: Dockerfile.admin
+    container_name: smartjewel-frontend-admin
     ports:
-      - "80:80"
+      - "8081:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+  # -------------------------------------------------------------
+  # Frontend Catalog App Service (Port 8082)
+  # -------------------------------------------------------------
+  frontend-catalog:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.catalog
+    container_name: smartjewel-frontend-catalog
+    ports:
+      - "8082:80"
     depends_on:
       - backend
     restart: unless-stopped

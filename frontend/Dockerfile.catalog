@@ -1,0 +1,21 @@
+# Estágio 1: Build de shared-core e catalog-app
+FROM node:20-alpine AS builder
+WORKDIR /build
+
+COPY package.json package-lock.json ./
+RUN npm ci || npm install
+
+COPY . .
+
+# Compilar a biblioteca e a vitrine pública de catálogo
+RUN npm run build:core && npm run build:catalog
+
+# Estágio 2: Servidor Nginx Alpine
+FROM nginx:1.25-alpine AS runner
+
+COPY nginx.catalog.conf /etc/nginx/conf.d/default.conf
+COPY --from=builder /build/dist/catalog-app/browser /usr/share/nginx/html
+
+EXPOSE 80
+
+CMD ["nginx", "-g", "daemon off;"]
