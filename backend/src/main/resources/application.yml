@@ -28,5 +28,10 @@ api:
       secret: ${JWT_SECRET:4zV9mK8xL2pQ5wR8tY1uI4oP7sA0dF3gH6jK9lM2nB5vC8xZ1qW4eR7tY0uI3oP}
       expiration-ms: 86400000 # 24 horas em milissegundos
 
+supabase:
+  url: ${SUPABASE_URL:https://your-supabase-project.supabase.co}
+  key: ${SUPABASE_KEY:your-supabase-anon-key}
+  bucket: ${SUPABASE_STORAGE_BUCKET:product-images}
+
 server:
   port: 8080

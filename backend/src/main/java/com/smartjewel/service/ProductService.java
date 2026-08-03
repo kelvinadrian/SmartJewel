@@ -8,6 +8,7 @@ import com.smartjewel.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.UUID;
@@ -17,6 +18,7 @@ import java.util.UUID;
 public class ProductService {
 
     private final ProductRepository productRepository;
+    private final ImageUploadService imageUploadService;
 
     @Transactional
     public ProductResponse createProduct(CreateProductRequest request) {
@@ -94,6 +96,17 @@ public class ProductService {
         }
 
         product.setQuantidadeEstoque(product.getQuantidadeEstoque() - quantidade);
+
+        Product updatedProduct = productRepository.save(product);
+        return toProductResponse(updatedProduct);
+    }
+
+    @Transactional
+    public ProductResponse uploadProductImage(UUID productId, MultipartFile file) {
+        Product product = findEntityById(productId);
+
+        String imageUrl = imageUploadService.uploadImage(file);
+        product.setImageUrl(imageUrl);
 
         Product updatedProduct = productRepository.save(product);
         return toProductResponse(updatedProduct);
