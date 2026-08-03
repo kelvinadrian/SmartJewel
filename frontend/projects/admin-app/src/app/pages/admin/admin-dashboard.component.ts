@@ -35,8 +35,8 @@ import { InventoryImportDialogComponent } from './components/inventory-import-di
     <div class="admin-container">
       <header class="admin-header">
         <div>
-          <h1>Painel Administrativo</h1>
-          <p>Gestão de semijoias, fotos e estoque</p>
+          <h1 class="gold-text">Painel Administrativo</h1>
+          <p>Gestão de semijoias, fotos e estoque de alta joalheria</p>
         </div>
 
         <div class="header-actions">
@@ -55,8 +55,8 @@ import { InventoryImportDialogComponent } from './components/inventory-import-di
       <div class="toolbar-section glass-card">
         <mat-form-field appearance="outline" class="search-field">
           <mat-label>Buscar Produto por Nome, SKU, Tipo ou Material...</mat-label>
-          <input matInput (keyup)="applyFilter($event)" placeholder="Ex: Anel, SKU-001..." #input />
-          <mat-icon matPrefix>search</mat-icon>
+          <input matInput (keyup)="applyFilter($event)" placeholder="Ex: Anel Solitário, SKU-001..." #input />
+          <mat-icon matPrefix color="primary">search</mat-icon>
         </mat-form-field>
       </div>
 
@@ -143,24 +143,24 @@ import { InventoryImportDialogComponent } from './components/inventory-import-di
   styles: [`
     .admin-container { max-width: 1200px; margin: 2rem auto; padding: 0 1rem; }
     .admin-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; }
-    .admin-header h1 { font-size: 2rem; font-weight: 700; margin-bottom: 0.2rem; }
+    .gold-text { font-size: 2rem; font-weight: 700; color: #D4AF37; margin-bottom: 0.2rem; }
     .admin-header p { color: #94a3b8; }
     .header-actions { display: flex; align-items: center; gap: 0.8rem; }
-    .import-btn { border-color: rgba(255,255,255,0.2) !important; color: #f8fafc !important; height: 44px; border-radius: 10px; }
-    .add-btn { height: 44px; border-radius: 10px; }
+    .import-btn { border-color: rgba(212, 175, 55, 0.4) !important; color: #D4AF37 !important; height: 44px; border-radius: 10px; }
+    .add-btn { background: linear-gradient(135deg, #D4AF37 0%, #b28b29 100%) !important; color: #1A1C1E !important; font-weight: 700; height: 44px; border-radius: 10px; }
     .toolbar-section { padding: 1rem; margin-bottom: 1.5rem; }
     .search-field { width: 100%; margin-bottom: -1.25em; }
     .full-width-table { width: 100%; background: transparent !important; }
-    .product-thumb { width: 48px; height: 48px; border-radius: 8px; object-fit: cover; border: 1px solid rgba(255,255,255,0.1); }
-    .thumb-placeholder { width: 48px; height: 48px; border-radius: 8px; background: rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center; color: #00897b; }
+    .product-thumb { width: 48px; height: 48px; border-radius: 8px; object-fit: cover; border: 1px solid rgba(212, 175, 55, 0.3); }
+    .thumb-placeholder { width: 48px; height: 48px; border-radius: 8px; background: rgba(212, 175, 55, 0.1); display: flex; align-items: center; justify-content: center; color: #D4AF37; }
     .sku-cell { font-family: monospace; font-weight: 600; color: #cbd5e1; }
-    .name-cell { font-weight: 600; color: #f8fafc; }
-    .price-cell { font-weight: 700; color: #38bdf8; }
+    .name-cell { font-weight: 600; color: #E2E2E6; }
+    .price-cell { font-weight: 700; color: #D4AF37; }
     .badge { padding: 0.3rem 0.6rem; border-radius: 6px; font-size: 0.75rem; font-weight: 600; }
-    .badge-tipo { background: rgba(0, 137, 123, 0.2); color: #80cbc4; }
-    .badge-material { background: rgba(236, 72, 153, 0.15); color: #f472b6; }
-    .stock-ok { color: #4ade80; font-weight: 600; }
-    .stock-zero { color: #f87171; font-weight: 600; }
+    .badge-tipo { background: rgba(212, 175, 55, 0.15); color: #D4AF37; border: 1px solid rgba(212, 175, 55, 0.3); }
+    .badge-material { background: rgba(46, 139, 87, 0.2); color: #4fb381; border: 1px solid rgba(46, 139, 87, 0.4); }
+    .stock-ok { color: #2E8B57; font-weight: 700; }
+    .stock-zero { color: #f87171; font-weight: 700; }
     .no-data-cell { text-align: center; padding: 2rem; color: #94a3b8; }
   `]
 })

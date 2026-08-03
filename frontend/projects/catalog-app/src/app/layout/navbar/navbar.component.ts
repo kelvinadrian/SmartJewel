@@ -35,17 +35,18 @@ import { MatIconModule } from '@angular/material/icon';
   `,
   styles: [`
     .navbar {
-      background: rgba(4, 41, 64, 0.85);
+      background: rgba(26, 28, 30, 0.95); /* Cinza-Chumbo Luxo */
       backdrop-filter: blur(12px);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      border-bottom: 1px solid rgba(212, 175, 55, 0.2); /* Ouro Nobre */
       position: sticky; top: 0; z-index: 1000; height: 70px;
       padding: 0 1.5rem; display: flex; justify-content: center;
     }
     .navbar-container { width: 100%; max-width: 1200px; display: flex; align-items: center; justify-content: space-between; }
-    .brand-logo { display: flex; align-items: center; gap: 0.5rem; text-decoration: none; color: #f8fafc; font-size: 1.4rem; font-weight: 700; }
-    .brand-icon { color: #80cbc4; }
-    .highlight { color: #80cbc4; }
+    .brand-logo { display: flex; align-items: center; gap: 0.5rem; text-decoration: none; color: #E2E2E6; font-size: 1.4rem; font-weight: 700; }
+    .brand-icon { color: #D4AF37; } /* Ouro Nobre */
+    .highlight { color: #D4AF37; } /* Ouro Nobre */
     .nav-links { display: flex; align-items: center; gap: 0.8rem; }
+    .active-link { color: #D4AF37 !important; border-bottom: 2px solid #D4AF37; }
   `]
 })
 export class NavbarComponent {}

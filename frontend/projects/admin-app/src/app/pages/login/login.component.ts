@@ -30,9 +30,9 @@ import { AuthService } from '@shared-core';
       <mat-card class="login-card glass-card">
         <mat-card-header class="card-header">
           <div class="brand-avatar">
-            <mat-icon>lock</mat-icon>
+            <mat-icon class="gold-icon">lock</mat-icon>
           </div>
-          <mat-card-title>Painel Administrativo</mat-card-title>
+          <mat-card-title class="gold-title">Painel Administrativo</mat-card-title>
           <mat-card-subtitle>Entre com suas credenciais de gestão</mat-card-subtitle>
         </mat-card-header>
 
@@ -92,12 +92,14 @@ import { AuthService } from '@shared-core';
       align-items: center;
       justify-content: center;
       padding: 1.5rem;
+      background-color: #1A1C1E;
     }
     .login-card {
       width: 100%;
       max-width: 420px;
       padding: 1.5rem 1rem;
-      border-radius: 20px;
+      background: #2A2D30;
+      border: 1px solid rgba(212, 175, 55, 0.25);
     }
     .card-header {
       display: flex;
@@ -110,18 +112,21 @@ import { AuthService } from '@shared-core';
       width: 56px;
       height: 56px;
       border-radius: 50%;
-      background: linear-gradient(135deg, #005c53 0%, #042940 100%);
+      background: linear-gradient(135deg, #D4AF37 0%, #a07722 100%);
       display: flex;
       align-items: center;
       justify-content: center;
       margin-bottom: 1rem;
-      color: #ffffff;
-      box-shadow: 0 4px 20px rgba(0, 92, 83, 0.4);
+      color: #1A1C1E;
+      box-shadow: 0 4px 20px rgba(212, 175, 55, 0.35);
     }
-    .card-header mat-card-title {
+    .gold-icon {
+      color: #1A1C1E !important;
+    }
+    .gold-title {
       font-size: 1.6rem;
       font-weight: 700;
-      color: #f8fafc;
+      color: #D4AF37 !important;
       margin-bottom: 0.4rem;
     }
     .card-header mat-card-subtitle {
@@ -136,13 +141,15 @@ import { AuthService } from '@shared-core';
       width: 100%;
       height: 48px;
       font-size: 1rem;
-      font-weight: 600;
+      font-weight: 700;
       border-radius: 12px;
       margin-top: 0.5rem;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 0.5rem;
+      background: linear-gradient(135deg, #D4AF37 0%, #b28b29 100%) !important;
+      color: #1A1C1E !important;
     }
   `]
 })

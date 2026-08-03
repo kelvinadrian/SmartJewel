@@ -37,7 +37,7 @@ import { AuthService } from '@shared-core';
               <mat-icon>arrow_drop_down</mat-icon>
             </button>
 
-            <mat-menu #userMenu="matMenu" xPosition="before">
+            <mat-menu #userMenu="matMenu" xPosition="before" class="dark-menu">
               <div class="user-info-header">
                 <p class="user-name">{{ authService.currentUser()?.nome }}</p>
                 <p class="user-email">{{ authService.currentUser()?.email }}</p>
@@ -49,7 +49,7 @@ import { AuthService } from '@shared-core';
               </button>
             </mat-menu>
           } @else {
-            <a mat-raised-button color="primary" routerLink="/login">
+            <a mat-raised-button color="primary" routerLink="/login" class="login-btn">
               <mat-icon>login</mat-icon>
               <span>Entrar</span>
             </a>
@@ -60,20 +60,21 @@ import { AuthService } from '@shared-core';
   `,
   styles: [`
     .navbar {
-      background: rgba(4, 41, 64, 0.85);
+      background: rgba(26, 28, 30, 0.95); /* Cinza-Chumbo Luxo */
       backdrop-filter: blur(12px);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      border-bottom: 1px solid rgba(212, 175, 55, 0.2); /* Borda Ouro Nobre */
       position: sticky; top: 0; z-index: 1000; height: 70px;
       padding: 0 1.5rem; display: flex; justify-content: center;
     }
     .navbar-container { width: 100%; max-width: 1200px; display: flex; align-items: center; justify-content: space-between; }
-    .brand-logo { display: flex; align-items: center; gap: 0.5rem; text-decoration: none; color: #f8fafc; font-size: 1.4rem; font-weight: 700; }
-    .brand-icon { color: #80cbc4; }
-    .highlight { color: #80cbc4; }
+    .brand-logo { display: flex; align-items: center; gap: 0.5rem; text-decoration: none; color: #E2E2E6; font-size: 1.4rem; font-weight: 700; }
+    .brand-icon { color: #D4AF37; } /* Ouro Nobre */
+    .highlight { color: #D4AF37; } /* Ouro Nobre */
     .nav-links { display: flex; align-items: center; gap: 0.8rem; }
     .user-info-header { padding: 0.8rem 1rem; }
-    .user-name { font-weight: 600; margin: 0; color: #f8fafc; }
+    .user-name { font-weight: 600; margin: 0; color: #E2E2E6; }
     .user-email { font-size: 0.8rem; color: #94a3b8; margin: 0; }
+    .login-btn { font-weight: 600; }
   `]
 })
 export class NavbarComponent {
