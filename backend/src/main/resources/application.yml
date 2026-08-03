@@ -12,6 +12,7 @@ spring:
       minimum-idle: 2
       idle-timeout: 30000
       max-lifetime: 1800000
+      initialization-fail-timeout: 1
 
   flyway:
     enabled: true
@@ -21,7 +22,7 @@ spring:
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
-      ddl-auto: validate
+      ddl-auto: update
     show-sql: true
     properties:
       hibernate:
