@@ -28,8 +28,8 @@ api:
       expiration-ms: 86400000 # 24 horas em milissegundos
 
 supabase:
-  url: ${SUPABASE_URL:https://your-supabase-project.supabase.co}
-  key: ${SUPABASE_KEY:your-supabase-anon-key}
+  url: ${SUPABASE_URL:https://zdywhupfukoaiekrywcy.supabase.co}
+  key: ${SUPABASE_KEY:sb_publishable_TQyvz93DDkhTxLDpHiGLKQ_4RmFJ8qR}
   bucket: ${SUPABASE_STORAGE_BUCKET:product-images}
 
 server:
