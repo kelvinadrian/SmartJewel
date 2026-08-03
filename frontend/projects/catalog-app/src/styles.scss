@@ -1,31 +1,54 @@
-// Petroleum Blue / Teal Theme for SmartJewel Catalog App
+// Luxury Jewelry Color System for SmartJewel Catalog App
 @use '@angular/material' as mat;
 
 @include mat.core();
 
-$petroleum-teal: (
-  50: #e0f2f1,
-  100: #b2dfdb,
-  200: #80cbc4,
-  300: #4db6ac,
-  400: #26a69a,
-  500: #009688,
-  600: #00897b,
-  700: #005c53, // Azul Petróleo Principal
-  800: #042940, // Azul Petróleo Escuro
-  900: #00251a,
+// Primary: Ouro Nobre (#D4AF37)
+$ouro-nobre-palette: (
+  50: #faf6e8,
+  100: #f2e7c5,
+  200: #e9d79e,
+  300: #e0c776,
+  400: #daba59,
+  500: #D4AF37,
+  600: #c59f31,
+  700: #b28b29,
+  800: #a07722,
+  900: #815c16,
   contrast: (
     50: rgba(0,0,0, 0.87),
     100: rgba(0,0,0, 0.87),
     200: rgba(0,0,0, 0.87),
-    500: #ffffff,
+    300: rgba(0,0,0, 0.87),
+    400: #1a1c1e,
+    500: #1a1c1e,
+    600: #ffffff,
     700: #ffffff,
     800: #ffffff
   )
 );
 
-$catalog-primary: mat.m2-define-palette($petroleum-teal, 700);
-$catalog-accent: mat.m2-define-palette(mat.$m2-amber-palette, A200);
+// Secondary: Esmeralda (#2E8B57)
+$esmeralda-palette: (
+  50: #e6f4ed,
+  100: #c1e4d3,
+  200: #98d2b5,
+  300: #6ec097,
+  400: #4fb381,
+  500: #2E8B57,
+  600: #298350,
+  700: #227847,
+  800: #1c6e3e,
+  900: #115c2e,
+  contrast: (
+    50: rgba(0,0,0, 0.87),
+    100: rgba(0,0,0, 0.87),
+    500: #ffffff
+  )
+);
+
+$catalog-primary: mat.m2-define-palette($ouro-nobre-palette, 500);
+$catalog-accent: mat.m2-define-palette($esmeralda-palette, 500);
 
 $catalog-theme: mat.m2-define-dark-theme((
   color: (
@@ -36,20 +59,19 @@ $catalog-theme: mat.m2-define-dark-theme((
 
 @include mat.all-component-themes($catalog-theme);
 
-/* Styling Globais e Dark Mode Glassmorphism */
+/* Global Luxury Styling & Lead-Gray Surface System */
 html, body {
   height: 100%;
   margin: 0;
   font-family: 'Outfit', 'Roboto', 'Segoe UI', sans-serif;
-  background-color: #04121e;
-  color: #f8fafc;
+  background-color: #1A1C1E; /* Cinza-Chumbo Fundo Base */
+  color: #E2E2E6; /* Off-White Texto Principal */
 }
 
+/* Glassmorphism Card com fundo Cinza-Chumbo Luxo e borda Ouro Nobre sutil */
 .glass-card {
-  background: rgba(4, 41, 64, 0.55);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: #2A2D30; /* Cinza-Chumbo Cards */
+  border: 1px solid rgba(212, 175, 55, 0.18);
   border-radius: 16px;
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
 }
