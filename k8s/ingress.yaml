@@ -1,0 +1,44 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: smartjewel-ingress
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+spec:
+  rules:
+    # Rota para o Painel Administrativo (admin-app)
+    - host: admin.smartjewel.com.br
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: smartjewel-admin-service
+                port:
+                  number: 80
+
+    # Rota para o Catálogo Público (catalog-app)
+    - host: www.smartjewel.com.br
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: smartjewel-catalog-service
+                port:
+                  number: 80
+
+    # Alias domínio raiz para o Catálogo Público
+    - host: smartjewel.com.br
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: smartjewel-catalog-service
+                port:
+                  number: 80

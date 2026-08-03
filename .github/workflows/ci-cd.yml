@@ -31,10 +31,10 @@ jobs:
           mvn clean test
 
   # -------------------------------------------------------------
-  # JOB 2: Continuous Integration (CI) - Frontend (Angular)
+  # JOB 2: Continuous Integration (CI) - Frontend (Angular Workspace)
   # -------------------------------------------------------------
   ci-frontend:
-    name: CI - Frontend (Angular & Node.js)
+    name: CI - Frontend (Angular Workspace: Admin & Catalog)
     runs-on: ubuntu-latest
 
     steps:
@@ -48,14 +48,16 @@ jobs:
           cache: 'npm'
           cache-dependency-path: frontend/package-lock.json
 
-      - name: Instalar Dependências e Compilar Angular Frontend
+      - name: Instalar Dependências e Compilar Projetos do Workspace
         run: |
           cd frontend
           npm ci || npm install
-          npm run build
+          npm run build:core
+          npm run build:admin
+          npm run build:catalog
 
   # -------------------------------------------------------------
-  # JOB 3: Continuous Deployment (CD) - Docker & Kubernetes Update
+  # JOB 3: Continuous Deployment (CD) - Multi-Image Build & Push
   # -------------------------------------------------------------
   cd:
     name: Continuous Deployment (Docker Build & Push)
@@ -81,9 +83,9 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       # ---------------------------------------------------------
-      # Build & Push BACKEND Docker Image
+      # 1. Build & Push BACKEND Docker Image
       # ---------------------------------------------------------
-      - name: Extrair Tags e Labels para Backend
+      - name: Extrair Metadata para Backend
         id: meta-backend
         uses: docker/metadata-action@v5
         with:
@@ -92,7 +94,7 @@ jobs:
             type=raw,value=latest
             type=sha,format=short
 
-      - name: Build e Push da Imagem Docker do Backend
+      - name: Build e Push Imagem Docker Backend
         uses: docker/build-push-action@v6
         with:
           context: ./backend
@@ -102,39 +104,65 @@ jobs:
           labels: ${{ steps.meta-backend.outputs.labels }}
 
       # ---------------------------------------------------------
-      # Build & Push FRONTEND Docker Image
+      # 2. Build & Push FRONTEND ADMIN Docker Image
       # ---------------------------------------------------------
-      - name: Extrair Tags e Labels para Frontend
-        id: meta-frontend
+      - name: Extrair Metadata para Admin App
+        id: meta-admin
         uses: docker/metadata-action@v5
         with:
-          images: ghcr.io/${{ github.repository_owner }}/smartjewel-frontend
+          images: ghcr.io/${{ github.repository_owner }}/smartjewel-admin
           tags: |
             type=raw,value=latest
             type=sha,format=short
 
-      - name: Build e Push da Imagem Docker do Frontend
+      - name: Build e Push Imagem Docker Admin App
         uses: docker/build-push-action@v6
         with:
           context: ./frontend
-          file: ./frontend/Dockerfile
+          file: ./frontend/Dockerfile.admin
           push: true
-          tags: ${{ steps.meta-frontend.outputs.tags }}
-          labels: ${{ steps.meta-frontend.outputs.labels }}
+          tags: ${{ steps.meta-admin.outputs.tags }}
+          labels: ${{ steps.meta-admin.outputs.labels }}
 
       # ---------------------------------------------------------
-      # Atualizar Tags nos Manifestos Kubernetes
+      # 3. Build & Push FRONTEND CATALOG Docker Image
+      # ---------------------------------------------------------
+      - name: Extrair Metadata para Catalog App
+        id: meta-catalog
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository_owner }}/smartjewel-catalog
+          tags: |
+            type=raw,value=latest
+            type=sha,format=short
+
+      - name: Build e Push Imagem Docker Catalog App
+        uses: docker/build-push-action@v6
+        with:
+          context: ./frontend
+          file: ./frontend/Dockerfile.catalog
+          push: true
+          tags: ${{ steps.meta-catalog.outputs.tags }}
+          labels: ${{ steps.meta-catalog.outputs.labels }}
+
+      # ---------------------------------------------------------
+      # 4. Atualizar Tags nos Manifestos Kubernetes
       # ---------------------------------------------------------
       - name: Atualizar Tags de Imagem nos Manifestos Kubernetes
         run: |
           BACKEND_TAG="ghcr.io/${{ github.repository_owner }}/smartjewel-backend:${GITHUB_SHA::7}"
-          FRONTEND_TAG="ghcr.io/${{ github.repository_owner }}/smartjewel-frontend:${GITHUB_SHA::7}"
+          ADMIN_TAG="ghcr.io/${{ github.repository_owner }}/smartjewel-admin:${GITHUB_SHA::7}"
+          CATALOG_TAG="ghcr.io/${{ github.repository_owner }}/smartjewel-catalog:${GITHUB_SHA::7}"
 
-          echo "Atualizando k8s/deployment.yaml para: $BACKEND_TAG"
+          echo "Atualizando k8s/deployment.yaml..."
           sed -i "s|image: smartjewel/backend:latest|image: $BACKEND_TAG|g" k8s/deployment.yaml
 
-          echo "Atualizando k8s/frontend-deployment.yaml para: $FRONTEND_TAG"
-          sed -i "s|image: smartjewel/frontend:latest|image: $FRONTEND_TAG|g" k8s/frontend-deployment.yaml
+          echo "Atualizando k8s/admin-deployment.yaml..."
+          sed -i "s|image: smartjewel/admin:latest|image: $ADMIN_TAG|g" k8s/admin-deployment.yaml
+
+          echo "Atualizando k8s/catalog-deployment.yaml..."
+          sed -i "s|image: smartjewel/catalog:latest|image: $CATALOG_TAG|g" k8s/catalog-deployment.yaml
 
           cat k8s/deployment.yaml | grep "image:"
-          cat k8s/frontend-deployment.yaml | grep "image:"
+          cat k8s/admin-deployment.yaml | grep "image:"
+          cat k8s/catalog-deployment.yaml | grep "image:"

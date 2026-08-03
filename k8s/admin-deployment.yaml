@@ -1,22 +1,22 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: smartjewel-frontend-deployment
+  name: smartjewel-admin-deployment
   labels:
-    app: smartjewel-frontend
+    app: smartjewel-admin
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: smartjewel-frontend
+      app: smartjewel-admin
   template:
     metadata:
       labels:
-        app: smartjewel-frontend
+        app: smartjewel-admin
     spec:
       containers:
-        - name: frontend
-          image: smartjewel/frontend:latest
+        - name: admin-app
+          image: smartjewel/admin:latest
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 80
