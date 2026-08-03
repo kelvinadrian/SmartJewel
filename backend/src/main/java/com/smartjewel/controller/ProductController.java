@@ -1,9 +1,11 @@
 package com.smartjewel.controller;
 
 import com.smartjewel.dto.CreateProductRequest;
+import com.smartjewel.dto.ImportSummaryResponse;
 import com.smartjewel.dto.ProductResponse;
 import com.smartjewel.dto.StockAdjustmentRequest;
 import com.smartjewel.dto.UpdateProductRequest;
+import com.smartjewel.service.InventoryImportService;
 import com.smartjewel.service.ProductService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +33,7 @@ import java.util.UUID;
 public class ProductController {
 
     private final ProductService productService;
+    private final InventoryImportService inventoryImportService;
 
     @PostMapping
     public ResponseEntity<ProductResponse> createProduct(@Valid @RequestBody CreateProductRequest request) {
@@ -75,6 +78,12 @@ public class ProductController {
     public ResponseEntity<ProductResponse> uploadProductImage(@PathVariable UUID id,
                                                               @RequestParam("file") MultipartFile file) {
         ProductResponse response = productService.uploadProductImage(id, file);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping(value = "/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ImportSummaryResponse> importInventory(@RequestParam("file") MultipartFile file) {
+        ImportSummaryResponse response = inventoryImportService.importInventory(file);
         return ResponseEntity.ok(response);
     }
 
