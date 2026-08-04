@@ -1,8 +1,6 @@
 package com.smartjewel.repository;
 
 import com.smartjewel.domain.model.Product;
-import com.smartjewel.domain.model.ProductMaterial;
-import com.smartjewel.domain.model.ProductType;
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.jpa.domain.Specification;
 
@@ -12,10 +10,9 @@ import java.util.UUID;
 
 public class ProductSpecification {
 
-    public static Specification<Product> filterCatalog(ProductType tipo,
-                                                       ProductMaterial material,
+    public static Specification<Product> filterCatalog(UUID productTypeId,
                                                        UUID categoryId,
-                                                       UUID subcategoryId,
+                                                       UUID materialColorId,
                                                        boolean inStockOnly) {
         return (root, query, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
@@ -24,18 +21,16 @@ public class ProductSpecification {
                 predicates.add(criteriaBuilder.greaterThan(root.get("quantidadeEstoque"), 0));
             }
 
-            if (tipo != null) {
-                predicates.add(criteriaBuilder.equal(root.get("tipo"), tipo));
+            if (productTypeId != null) {
+                predicates.add(criteriaBuilder.equal(root.get("productType").get("id"), productTypeId));
             }
 
-            if (material != null) {
-                predicates.add(criteriaBuilder.equal(root.get("material"), material));
+            if (categoryId != null) {
+                predicates.add(criteriaBuilder.equal(root.get("category").get("id"), categoryId));
             }
 
-            if (subcategoryId != null) {
-                predicates.add(criteriaBuilder.equal(root.get("subcategory").get("id"), subcategoryId));
-            } else if (categoryId != null) {
-                predicates.add(criteriaBuilder.equal(root.get("subcategory").get("category").get("id"), categoryId));
+            if (materialColorId != null) {
+                predicates.add(criteriaBuilder.equal(root.get("materialColor").get("id"), materialColorId));
             }
 
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));

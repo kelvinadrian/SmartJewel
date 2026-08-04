@@ -1,7 +1,5 @@
 package com.smartjewel.dto;
 
-import com.smartjewel.domain.model.ProductMaterial;
-import com.smartjewel.domain.model.ProductType;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -25,13 +23,9 @@ public class CreateProductRequest {
     @NotBlank(message = "O SKU é obrigatório")
     private String sku;
 
-    @NotNull(message = "O tipo do produto é obrigatório")
-    private ProductType tipo;
-
-    @NotNull(message = "O material do produto é obrigatório")
-    private ProductMaterial material;
-
-    private UUID subcategoryId;
+    private UUID productTypeId;
+    private UUID categoryId;
+    private UUID materialColorId;
 
     @NotNull(message = "A quantidade inicial em estoque é obrigatória")
     @Min(value = 0, message = "A quantidade em estoque não pode ser negativa")

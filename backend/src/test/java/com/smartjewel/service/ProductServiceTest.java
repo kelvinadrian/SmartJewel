@@ -1,11 +1,12 @@
 package com.smartjewel.service;
 
 import com.smartjewel.domain.model.Product;
-import com.smartjewel.domain.model.ProductMaterial;
-import com.smartjewel.domain.model.ProductType;
 import com.smartjewel.dto.CreateProductRequest;
 import com.smartjewel.dto.ProductResponse;
+import com.smartjewel.repository.CategoryRepository;
+import com.smartjewel.repository.MaterialColorRepository;
 import com.smartjewel.repository.ProductRepository;
+import com.smartjewel.repository.ProductTypeRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -33,7 +34,13 @@ class ProductServiceTest {
     private ProductRepository productRepository;
 
     @Mock
-    private ImageUploadService imageUploadService;
+    private ProductTypeRepository productTypeRepository;
+
+    @Mock
+    private CategoryRepository categoryRepository;
+
+    @Mock
+    private MaterialColorRepository materialColorRepository;
 
     @InjectMocks
     private ProductService productService;
@@ -48,9 +55,9 @@ class ProductServiceTest {
                 .id(productId)
                 .nome("Anel Solitário Prata")
                 .sku("ANEL-001")
-                .tipo(ProductType.ANEL)
-                .material(ProductMaterial.PRATA)
                 .quantidadeEstoque(10)
+                .availableQuantity(10)
+                .reservedQuantity(0)
                 .preco(new BigDecimal("150.00"))
                 .build();
     }
@@ -91,7 +98,7 @@ class ProductServiceTest {
                 () -> productService.removeStock(productId, 15)
         );
 
-        assertEquals("Estoque insuficiente. Estoque atual: 10, Quantidade solicitada: 15", exception.getMessage());
+        assertEquals("Estoque livre insuficiente. Disponível: 10, Solicitado: 15", exception.getMessage());
         verify(productRepository, never()).save(any());
     }
 
@@ -101,8 +108,6 @@ class ProductServiceTest {
         CreateProductRequest request = CreateProductRequest.builder()
                 .nome("Colar Coração Banhado a Ouro")
                 .sku("COLAR-002")
-                .tipo(ProductType.COLAR)
-                .material(ProductMaterial.BANHADO_A_OURO)
                 .quantidadeEstoque(20)
                 .preco(new BigDecimal("220.00"))
                 .build();
@@ -128,8 +133,6 @@ class ProductServiceTest {
         CreateProductRequest request = CreateProductRequest.builder()
                 .nome("Brinco Argola")
                 .sku("ANEL-001")
-                .tipo(ProductType.BRINCO)
-                .material(ProductMaterial.PRATA)
                 .quantidadeEstoque(5)
                 .preco(new BigDecimal("90.00"))
                 .build();

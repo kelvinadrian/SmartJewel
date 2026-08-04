@@ -1,7 +1,5 @@
 package com.smartjewel.dto;
 
-import com.smartjewel.domain.model.ProductMaterial;
-import com.smartjewel.domain.model.ProductType;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -22,13 +20,9 @@ public class UpdateProductRequest {
     @NotBlank(message = "O nome do produto é obrigatório")
     private String nome;
 
-    @NotNull(message = "O tipo do produto é obrigatório")
-    private ProductType tipo;
-
-    @NotNull(message = "O material do produto é obrigatório")
-    private ProductMaterial material;
-
-    private UUID subcategoryId;
+    private UUID productTypeId;
+    private UUID categoryId;
+    private UUID materialColorId;
 
     private String imageUrl;
 

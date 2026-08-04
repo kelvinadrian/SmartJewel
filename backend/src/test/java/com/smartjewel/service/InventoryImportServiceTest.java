@@ -1,10 +1,10 @@
 package com.smartjewel.service;
 
 import com.smartjewel.domain.model.Product;
-import com.smartjewel.domain.model.ProductMaterial;
-import com.smartjewel.domain.model.ProductType;
 import com.smartjewel.dto.ImportSummaryResponse;
+import com.smartjewel.repository.MaterialColorRepository;
 import com.smartjewel.repository.ProductRepository;
+import com.smartjewel.repository.ProductTypeRepository;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -38,6 +38,12 @@ class InventoryImportServiceTest {
     @Mock
     private ProductRepository productRepository;
 
+    @Mock
+    private ProductTypeRepository productTypeRepository;
+
+    @Mock
+    private MaterialColorRepository materialColorRepository;
+
     @InjectMocks
     private InventoryImportService inventoryImportService;
 
@@ -49,9 +55,9 @@ class InventoryImportServiceTest {
                 .id(UUID.randomUUID())
                 .nome("Pulseira Prata Existente")
                 .sku("PULS-001")
-                .tipo(ProductType.PULSEIRA)
-                .material(ProductMaterial.PRATA)
                 .quantidadeEstoque(5)
+                .availableQuantity(5)
+                .reservedQuantity(0)
                 .preco(new BigDecimal("120.00"))
                 .build();
     }
@@ -60,8 +66,8 @@ class InventoryImportServiceTest {
     @DisplayName("Deve ler arquivo CSV com sucesso, atualizar item existente e criar item novo")
     void shouldImportCsvAndCreateAndUpgradeStock() {
         String csvContent = "SKU,Nome,Tipo,Material,Quantidade,Preco\n" +
-                "PULS-001,Pulseira Prata,PULSEIRA,PRATA,10,120.00\n" +
-                "BRIN-002,Brinco Argola,BRINCO,BANHADO_A_OURO,15,80.00\n";
+                "PULS-001,Pulseira Prata,Pulseira,Prata,10,120.00\n" +
+                "BRIN-002,Brinco Argola,Brinco,Banhado a Ouro,15,80.00\n";
 
         MockMultipartFile file = new MockMultipartFile(
                 "file", "estoque.csv", "text/csv", csvContent.getBytes(StandardCharsets.UTF_8)
@@ -99,8 +105,8 @@ class InventoryImportServiceTest {
             Row row1 = sheet.createRow(1);
             row1.createCell(0).setCellValue("PULS-001");
             row1.createCell(1).setCellValue("Pulseira Prata");
-            row1.createCell(2).setCellValue("PULSEIRA");
-            row1.createCell(3).setCellValue("PRATA");
+            row1.createCell(2).setCellValue("Pulseira");
+            row1.createCell(3).setCellValue("Prata");
             row1.createCell(4).setCellValue(20);
             row1.createCell(5).setCellValue(120.00);
 

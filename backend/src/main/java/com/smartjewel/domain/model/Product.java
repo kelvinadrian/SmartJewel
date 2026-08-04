@@ -2,8 +2,6 @@ package com.smartjewel.domain.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -41,17 +39,17 @@ public class Product extends BaseEntity {
     @Column(nullable = false, unique = true)
     private String sku;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private ProductType tipo;
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private ProductMaterial material;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "product_type_id")
+    private ProductType productType;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "subcategory_id")
-    private Subcategory subcategory;
+    @JoinColumn(name = "category_id")
+    private Category category;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "material_color_id")
+    private MaterialColor materialColor;
 
     @Column(name = "quantidade_estoque", nullable = false)
     private Integer quantidadeEstoque;

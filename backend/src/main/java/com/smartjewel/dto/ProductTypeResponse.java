@@ -11,10 +11,8 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class SubcategoryResponse {
+public class ProductTypeResponse {
     private UUID id;
     private String nome;
     private String descricao;
-    private UUID categoryId;
-    private String categoryNome;
 }

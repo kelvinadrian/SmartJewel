@@ -1,13 +1,11 @@
 package com.smartjewel.service;
 
 import com.smartjewel.domain.model.Category;
-import com.smartjewel.domain.model.Subcategory;
+import com.smartjewel.domain.model.ProductType;
 import com.smartjewel.dto.CategoryResponse;
 import com.smartjewel.dto.CreateCategoryRequest;
-import com.smartjewel.dto.CreateSubcategoryRequest;
-import com.smartjewel.dto.SubcategoryResponse;
 import com.smartjewel.repository.CategoryRepository;
-import com.smartjewel.repository.SubcategoryRepository;
+import com.smartjewel.repository.ProductTypeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,11 +18,18 @@ import java.util.UUID;
 public class CategoryService {
 
     private final CategoryRepository categoryRepository;
-    private final SubcategoryRepository subcategoryRepository;
+    private final ProductTypeRepository productTypeRepository;
 
     @Transactional(readOnly = true)
-    public List<CategoryResponse> getAllCategoriesWithSubcategories() {
+    public List<CategoryResponse> getAllCategories() {
         return categoryRepository.findAllByOrderByNomeAsc().stream()
+                .map(this::toCategoryResponse)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<CategoryResponse> getCategoriesByProductType(UUID productTypeId) {
+        return categoryRepository.findByProductTypeIdOrderByNomeAsc(productTypeId).stream()
                 .map(this::toCategoryResponse)
                 .toList();
     }
@@ -38,13 +43,16 @@ public class CategoryService {
 
     @Transactional
     public CategoryResponse createCategory(CreateCategoryRequest request) {
-        if (categoryRepository.existsByNomeIgnoreCase(request.getNome())) {
-            throw new IllegalArgumentException("Já existe uma categoria cadastrada com o nome: " + request.getNome());
+        ProductType productType = null;
+        if (request.getProductTypeId() != null) {
+            productType = productTypeRepository.findById(request.getProductTypeId())
+                    .orElseThrow(() -> new IllegalArgumentException("Tipo de produto não encontrado com o ID: " + request.getProductTypeId()));
         }
 
         Category category = Category.builder()
                 .nome(request.getNome())
                 .descricao(request.getDescricao())
+                .productType(productType)
                 .build();
 
         Category savedCategory = categoryRepository.save(category);
@@ -56,47 +64,18 @@ public class CategoryService {
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Categoria não encontrada com o ID: " + id));
 
-        if (!category.getNome().equalsIgnoreCase(request.getNome()) &&
-                categoryRepository.existsByNomeIgnoreCase(request.getNome())) {
-            throw new IllegalArgumentException("Já existe outra categoria com o nome: " + request.getNome());
+        ProductType productType = null;
+        if (request.getProductTypeId() != null) {
+            productType = productTypeRepository.findById(request.getProductTypeId())
+                    .orElseThrow(() -> new IllegalArgumentException("Tipo de produto não encontrado com o ID: " + request.getProductTypeId()));
         }
 
         category.setNome(request.getNome());
         category.setDescricao(request.getDescricao());
+        category.setProductType(productType);
 
         Category updatedCategory = categoryRepository.save(category);
         return toCategoryResponse(updatedCategory);
-    }
-
-    @Transactional
-    public SubcategoryResponse createSubcategory(UUID categoryId, CreateSubcategoryRequest request) {
-        Category category = categoryRepository.findById(categoryId)
-                .orElseThrow(() -> new IllegalArgumentException("Categoria não encontrada com o ID: " + categoryId));
-
-        if (subcategoryRepository.existsByNomeIgnoreCaseAndCategoryId(request.getNome(), categoryId)) {
-            throw new IllegalArgumentException("Já existe uma subcategoria com este nome para esta categoria");
-        }
-
-        Subcategory subcategory = Subcategory.builder()
-                .nome(request.getNome())
-                .descricao(request.getDescricao())
-                .category(category)
-                .build();
-
-        Subcategory savedSubcategory = subcategoryRepository.save(subcategory);
-        return toSubcategoryResponse(savedSubcategory);
-    }
-
-    @Transactional
-    public SubcategoryResponse updateSubcategory(UUID subcategoryId, CreateSubcategoryRequest request) {
-        Subcategory subcategory = subcategoryRepository.findById(subcategoryId)
-                .orElseThrow(() -> new IllegalArgumentException("Subcategoria não encontrada com o ID: " + subcategoryId));
-
-        subcategory.setNome(request.getNome());
-        subcategory.setDescricao(request.getDescricao());
-
-        Subcategory updatedSubcategory = subcategoryRepository.save(subcategory);
-        return toSubcategoryResponse(updatedSubcategory);
     }
 
     @Transactional
@@ -106,34 +85,13 @@ public class CategoryService {
         categoryRepository.delete(category);
     }
 
-    @Transactional
-    public void deleteSubcategory(UUID subcategoryId) {
-        Subcategory subcategory = subcategoryRepository.findById(subcategoryId)
-                .orElseThrow(() -> new IllegalArgumentException("Subcategoria não encontrada com o ID: " + subcategoryId));
-        subcategoryRepository.delete(subcategory);
-    }
-
     public CategoryResponse toCategoryResponse(Category category) {
-        List<SubcategoryResponse> subcategoryResponses = category.getSubcategories() != null ?
-                category.getSubcategories().stream()
-                        .map(this::toSubcategoryResponse)
-                        .toList() : List.of();
-
         return CategoryResponse.builder()
                 .id(category.getId())
                 .nome(category.getNome())
                 .descricao(category.getDescricao())
-                .subcategories(subcategoryResponses)
-                .build();
-    }
-
-    public SubcategoryResponse toSubcategoryResponse(Subcategory subcategory) {
-        return SubcategoryResponse.builder()
-                .id(subcategory.getId())
-                .nome(subcategory.getNome())
-                .descricao(subcategory.getDescricao())
-                .categoryId(subcategory.getCategory() != null ? subcategory.getCategory().getId() : null)
-                .categoryNome(subcategory.getCategory() != null ? subcategory.getCategory().getNome() : null)
+                .productTypeId(category.getProductType() != null ? category.getProductType().getId() : null)
+                .productTypeNome(category.getProductType() != null ? category.getProductType().getNome() : null)
                 .build();
     }
 }

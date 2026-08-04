@@ -1,13 +1,10 @@
 package com.smartjewel.controller;
 
-import com.smartjewel.domain.model.ProductMaterial;
-import com.smartjewel.domain.model.ProductType;
 import com.smartjewel.dto.ProductResponse;
 import com.smartjewel.service.CatalogService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,13 +24,12 @@ public class CatalogController {
 
     @GetMapping
     public ResponseEntity<Page<ProductResponse>> getCatalog(
-            @RequestParam(required = false) ProductType tipo,
-            @RequestParam(required = false) ProductMaterial material,
+            @RequestParam(required = false) UUID productTypeId,
             @RequestParam(required = false) UUID categoryId,
-            @RequestParam(required = false) UUID subcategoryId,
-            @PageableDefault(size = 12, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
-
-        Page<ProductResponse> response = catalogService.getCatalog(tipo, material, categoryId, subcategoryId, pageable);
+            @RequestParam(required = false) UUID materialColorId,
+            @PageableDefault(size = 12, sort = "createdAt") Pageable pageable
+    ) {
+        Page<ProductResponse> response = catalogService.getCatalog(productTypeId, categoryId, materialColorId, pageable);
         return ResponseEntity.ok(response);
     }
 

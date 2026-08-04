@@ -1,16 +1,19 @@
 package com.smartjewel.service;
 
+import com.smartjewel.domain.model.Category;
+import com.smartjewel.domain.model.MaterialColor;
 import com.smartjewel.domain.model.Product;
-import com.smartjewel.domain.model.Subcategory;
+import com.smartjewel.domain.model.ProductType;
 import com.smartjewel.dto.CreateProductRequest;
 import com.smartjewel.dto.ProductResponse;
 import com.smartjewel.dto.UpdateProductRequest;
+import com.smartjewel.repository.CategoryRepository;
+import com.smartjewel.repository.MaterialColorRepository;
 import com.smartjewel.repository.ProductRepository;
-import com.smartjewel.repository.SubcategoryRepository;
+import com.smartjewel.repository.ProductTypeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.UUID;
@@ -20,7 +23,9 @@ import java.util.UUID;
 public class ProductService {
 
     private final ProductRepository productRepository;
-    private final SubcategoryRepository subcategoryRepository;
+    private final ProductTypeRepository productTypeRepository;
+    private final CategoryRepository categoryRepository;
+    private final MaterialColorRepository materialColorRepository;
     private final ImageUploadService imageUploadService;
 
     @Transactional
@@ -29,19 +34,33 @@ public class ProductService {
             throw new IllegalArgumentException("Já existe um produto cadastrado com o SKU: " + request.getSku());
         }
 
-        Subcategory subcategory = null;
-        if (request.getSubcategoryId() != null) {
-            subcategory = subcategoryRepository.findById(request.getSubcategoryId())
-                    .orElseThrow(() -> new IllegalArgumentException("Subcategoria não encontrada com o ID: " + request.getSubcategoryId()));
+        ProductType productType = null;
+        if (request.getProductTypeId() != null) {
+            productType = productTypeRepository.findById(request.getProductTypeId())
+                    .orElseThrow(() -> new IllegalArgumentException("Tipo de produto não encontrado com o ID: " + request.getProductTypeId()));
+        }
+
+        Category category = null;
+        if (request.getCategoryId() != null) {
+            category = categoryRepository.findById(request.getCategoryId())
+                    .orElseThrow(() -> new IllegalArgumentException("Categoria não encontrada com o ID: " + request.getCategoryId()));
+        }
+
+        MaterialColor materialColor = null;
+        if (request.getMaterialColorId() != null) {
+            materialColor = materialColorRepository.findById(request.getMaterialColorId())
+                    .orElseThrow(() -> new IllegalArgumentException("Material/Cor não encontrado com o ID: " + request.getMaterialColorId()));
         }
 
         Product product = Product.builder()
                 .nome(request.getNome())
                 .sku(request.getSku())
-                .tipo(request.getTipo())
-                .material(request.getMaterial())
-                .subcategory(subcategory)
+                .productType(productType)
+                .category(category)
+                .materialColor(materialColor)
                 .quantidadeEstoque(request.getQuantidadeEstoque())
+                .availableQuantity(request.getQuantidadeEstoque())
+                .reservedQuantity(0)
                 .imageUrl(request.getImageUrl())
                 .preco(request.getPreco())
                 .build();
@@ -67,16 +86,28 @@ public class ProductService {
     public ProductResponse updateProduct(UUID id, UpdateProductRequest request) {
         Product product = findEntityById(id);
 
-        Subcategory subcategory = null;
-        if (request.getSubcategoryId() != null) {
-            subcategory = subcategoryRepository.findById(request.getSubcategoryId())
-                    .orElseThrow(() -> new IllegalArgumentException("Subcategoria não encontrada com o ID: " + request.getSubcategoryId()));
+        ProductType productType = null;
+        if (request.getProductTypeId() != null) {
+            productType = productTypeRepository.findById(request.getProductTypeId())
+                    .orElseThrow(() -> new IllegalArgumentException("Tipo de produto não encontrado com o ID: " + request.getProductTypeId()));
+        }
+
+        Category category = null;
+        if (request.getCategoryId() != null) {
+            category = categoryRepository.findById(request.getCategoryId())
+                    .orElseThrow(() -> new IllegalArgumentException("Categoria não encontrada com o ID: " + request.getCategoryId()));
+        }
+
+        MaterialColor materialColor = null;
+        if (request.getMaterialColorId() != null) {
+            materialColor = materialColorRepository.findById(request.getMaterialColorId())
+                    .orElseThrow(() -> new IllegalArgumentException("Material/Cor não encontrado com o ID: " + request.getMaterialColorId()));
         }
 
         product.setNome(request.getNome());
-        product.setTipo(request.getTipo());
-        product.setMaterial(request.getMaterial());
-        product.setSubcategory(subcategory);
+        product.setProductType(productType);
+        product.setCategory(category);
+        product.setMaterialColor(materialColor);
         if (request.getImageUrl() != null && !request.getImageUrl().isBlank()) {
             product.setImageUrl(request.getImageUrl());
         }
@@ -93,7 +124,8 @@ public class ProductService {
         }
 
         Product product = findEntityById(id);
-        product.setQuantidadeEstoque(product.getQuantidadeEstoque() + quantidade);
+        product.setAvailableQuantity(product.getAvailableQuantity() + quantidade);
+        product.setQuantidadeEstoque(product.getAvailableQuantity() + product.getReservedQuantity());
 
         Product updatedProduct = productRepository.save(product);
         return toProductResponse(updatedProduct);
@@ -107,26 +139,25 @@ public class ProductService {
 
         Product product = findEntityById(id);
 
-        if (product.getQuantidadeEstoque() < quantidade) {
+        if (product.getAvailableQuantity() < quantidade) {
             throw new IllegalArgumentException(
-                    String.format("Estoque insuficiente. Estoque atual: %d, Quantidade solicitada: %d",
-                            product.getQuantidadeEstoque(), quantidade)
+                    String.format("Estoque livre insuficiente. Disponível: %d, Solicitado: %d",
+                            product.getAvailableQuantity(), quantidade)
             );
         }
 
-        product.setQuantidadeEstoque(product.getQuantidadeEstoque() - quantidade);
+        product.setAvailableQuantity(product.getAvailableQuantity() - quantidade);
+        product.setQuantidadeEstoque(product.getAvailableQuantity() + product.getReservedQuantity());
 
         Product updatedProduct = productRepository.save(product);
         return toProductResponse(updatedProduct);
     }
 
     @Transactional
-    public ProductResponse uploadProductImage(UUID productId, MultipartFile file) {
-        Product product = findEntityById(productId);
-
+    public ProductResponse uploadProductImage(UUID id, org.springframework.web.multipart.MultipartFile file) {
+        Product product = findEntityById(id);
         String imageUrl = imageUploadService.uploadImage(file);
         product.setImageUrl(imageUrl);
-
         Product updatedProduct = productRepository.save(product);
         return toProductResponse(updatedProduct);
     }
@@ -137,35 +168,29 @@ public class ProductService {
         productRepository.delete(product);
     }
 
-    private Product findEntityById(UUID id) {
+    public Product findEntityById(UUID id) {
         return productRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Produto não encontrado com o ID: " + id));
     }
 
     public ProductResponse toProductResponse(Product product) {
-        Subcategory subcategory = product.getSubcategory();
-        UUID subcategoryId = subcategory != null ? subcategory.getId() : null;
-        String subcategoryNome = subcategory != null ? subcategory.getNome() : null;
-        UUID categoryId = (subcategory != null && subcategory.getCategory() != null) ? subcategory.getCategory().getId() : null;
-        String categoryNome = (subcategory != null && subcategory.getCategory() != null) ? subcategory.getCategory().getNome() : null;
-
         return ProductResponse.builder()
                 .id(product.getId())
                 .nome(product.getNome())
                 .sku(product.getSku())
-                .tipo(product.getTipo())
-                .material(product.getMaterial())
-                .subcategoryId(subcategoryId)
-                .subcategoryNome(subcategoryNome)
-                .categoryId(categoryId)
-                .categoryNome(categoryNome)
+                .productTypeId(product.getProductType() != null ? product.getProductType().getId() : null)
+                .productTypeNome(product.getProductType() != null ? product.getProductType().getNome() : null)
+                .categoryId(product.getCategory() != null ? product.getCategory().getId() : null)
+                .categoryNome(product.getCategory() != null ? product.getCategory().getNome() : null)
+                .materialColorId(product.getMaterialColor() != null ? product.getMaterialColor().getId() : null)
+                .materialColorNome(product.getMaterialColor() != null ? product.getMaterialColor().getNome() : null)
                 .quantidadeEstoque(product.getQuantidadeEstoque())
+                .availableQuantity(product.getAvailableQuantity())
+                .reservedQuantity(product.getReservedQuantity())
                 .imageUrl(product.getImageUrl())
                 .preco(product.getPreco())
                 .createdAt(product.getCreatedAt())
                 .updatedAt(product.getUpdatedAt())
-                .createdBy(product.getCreatedBy())
-                .lastModifiedBy(product.getLastModifiedBy())
                 .build();
     }
 }

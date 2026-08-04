@@ -2,11 +2,13 @@ package com.smartjewel.service;
 
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvException;
+import com.smartjewel.domain.model.MaterialColor;
 import com.smartjewel.domain.model.Product;
-import com.smartjewel.domain.model.ProductMaterial;
 import com.smartjewel.domain.model.ProductType;
 import com.smartjewel.dto.ImportSummaryResponse;
+import com.smartjewel.repository.MaterialColorRepository;
 import com.smartjewel.repository.ProductRepository;
+import com.smartjewel.repository.ProductTypeRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Cell;
@@ -36,6 +38,8 @@ import java.util.Optional;
 public class InventoryImportService {
 
     private final ProductRepository productRepository;
+    private final ProductTypeRepository productTypeRepository;
+    private final MaterialColorRepository materialColorRepository;
 
     @Transactional
     public ImportSummaryResponse importInventory(MultipartFile file) {
@@ -71,7 +75,7 @@ public class InventoryImportService {
             for (int i = 1; i < rows.size(); i++) {
                 String[] row = rows.get(i);
                 if (row.length == 0 || (row.length == 1 && row[0].trim().isEmpty())) {
-                    continue; // Pular linhas em branco
+                    continue;
                 }
 
                 try {
@@ -158,19 +162,20 @@ public class InventoryImportService {
         String precoStr = getFieldValue(headerMap, extractor, "preco");
         String imageUrl = getFieldValue(headerMap, extractor, "imageUrl");
 
-        ProductType tipo = parseProductType(tipoStr);
-        ProductMaterial material = parseProductMaterial(materialStr);
+        ProductType productType = parseProductType(tipoStr);
+        MaterialColor materialColor = parseMaterialColor(materialStr);
         BigDecimal preco = parseBigDecimal(precoStr, BigDecimal.ZERO);
 
         Optional<Product> optionalProduct = productRepository.findBySku(sku);
 
         if (optionalProduct.isPresent()) {
             Product product = optionalProduct.get();
-            product.setQuantidadeEstoque(product.getQuantidadeEstoque() + quantidade);
+            product.setAvailableQuantity(product.getAvailableQuantity() + quantidade);
+            product.setQuantidadeEstoque(product.getAvailableQuantity() + product.getReservedQuantity());
 
             if (nome != null && !nome.isBlank()) product.setNome(nome);
-            if (tipo != null) product.setTipo(tipo);
-            if (material != null) product.setMaterial(material);
+            if (productType != null) product.setProductType(productType);
+            if (materialColor != null) product.setMaterialColor(materialColor);
             if (preco != null && preco.compareTo(BigDecimal.ZERO) > 0) product.setPreco(preco);
             if (imageUrl != null && !imageUrl.isBlank()) product.setImageUrl(imageUrl);
 
@@ -184,9 +189,11 @@ public class InventoryImportService {
             Product product = Product.builder()
                     .sku(sku)
                     .nome(nome)
-                    .tipo(tipo != null ? tipo : ProductType.OUTROS)
-                    .material(material != null ? material : ProductMaterial.BANHADO_A_OURO)
+                    .productType(productType)
+                    .materialColor(materialColor)
                     .quantidadeEstoque(Math.max(quantidade, 0))
+                    .availableQuantity(Math.max(quantidade, 0))
+                    .reservedQuantity(0)
                     .preco(preco != null ? preco : BigDecimal.ZERO)
                     .imageUrl(imageUrl)
                     .build();
@@ -230,25 +237,15 @@ public class InventoryImportService {
     }
 
     private ProductType parseProductType(String text) {
-        if (text == null || text.isBlank()) return ProductType.OUTROS;
-        String clean = text.trim().toUpperCase();
-        for (ProductType type : ProductType.values()) {
-            if (type.name().equalsIgnoreCase(clean) || type.getDescription().equalsIgnoreCase(clean)) {
-                return type;
-            }
-        }
-        return ProductType.OUTROS;
+        if (text == null || text.isBlank()) return null;
+        String clean = text.trim();
+        return productTypeRepository.findByNomeIgnoreCase(clean).orElse(null);
     }
 
-    private ProductMaterial parseProductMaterial(String text) {
-        if (text == null || text.isBlank()) return ProductMaterial.BANHADO_A_OURO;
-        String clean = text.trim().toUpperCase();
-        for (ProductMaterial mat : ProductMaterial.values()) {
-            if (mat.name().equalsIgnoreCase(clean) || mat.getDescription().equalsIgnoreCase(clean)) {
-                return mat;
-            }
-        }
-        return ProductMaterial.BANHADO_A_OURO;
+    private MaterialColor parseMaterialColor(String text) {
+        if (text == null || text.isBlank()) return null;
+        String clean = text.trim();
+        return materialColorRepository.findByNomeIgnoreCase(clean).orElse(null);
     }
 
     private int parseInteger(String value, int defaultValue) {

@@ -1,8 +1,6 @@
 package com.smartjewel.service;
 
 import com.smartjewel.domain.model.Product;
-import com.smartjewel.domain.model.ProductMaterial;
-import com.smartjewel.domain.model.ProductType;
 import com.smartjewel.dto.ProductResponse;
 import com.smartjewel.repository.ProductRepository;
 import com.smartjewel.repository.ProductSpecification;
@@ -23,12 +21,11 @@ public class CatalogService {
     private final ProductService productService;
 
     @Transactional(readOnly = true)
-    public Page<ProductResponse> getCatalog(ProductType tipo,
-                                           ProductMaterial material,
+    public Page<ProductResponse> getCatalog(UUID productTypeId,
                                            UUID categoryId,
-                                           UUID subcategoryId,
+                                           UUID materialColorId,
                                            Pageable pageable) {
-        Specification<Product> spec = ProductSpecification.filterCatalog(tipo, material, categoryId, subcategoryId, true);
+        Specification<Product> spec = ProductSpecification.filterCatalog(productTypeId, categoryId, materialColorId, true);
         Page<Product> productsPage = productRepository.findAll(spec, pageable);
         return productsPage.map(productService::toProductResponse);
     }
