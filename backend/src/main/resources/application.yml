@@ -34,9 +34,12 @@ api:
       expiration-ms: 86400000
 
 supabase:
-  url: ${SUPABASE_URL}
-  key: ${SUPABASE_KEY}
-  bucket: ${SUPABASE_STORAGE_BUCKET:product-images}
+  s3:
+    endpoint: ${SUPABASE_S3_ENDPOINT:https://zdywhupfukoaiekrywcy.supabase.co/storage/v1/s3}
+    region: ${SUPABASE_S3_REGION:us-east-1}
+    access-key: ${SUPABASE_S3_ACCESS_KEY:dummy}
+    secret-key: ${SUPABASE_S3_SECRET_KEY:dummy}
+    bucket-name: ${SUPABASE_STORAGE_BUCKET:product-images}
 
 server:
   port: ${PORT:8080}
@@ -47,4 +50,3 @@ logging:
     com.zaxxer.hikari: DEBUG
     org.hibernate: INFO
     org.postgresql: TRACE
-

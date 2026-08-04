@@ -82,6 +82,13 @@
             <version>${opencsv.version}</version>
         </dependency>
 
+        <!-- AWS SDK v2 S3 para Supabase S3 Storage -->
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>s3</artifactId>
+            <version>2.29.51</version>
+        </dependency>
+
         <!-- Flyway Database Migrations -->
         <dependency>
             <groupId>org.flywaydb</groupId>
