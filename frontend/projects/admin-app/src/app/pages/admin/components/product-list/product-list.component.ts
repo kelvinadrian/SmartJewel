@@ -36,17 +36,17 @@ import { InventoryImportDialogComponent } from '../inventory-import-dialog/inven
       <!-- HEADER COM TÍTULO E BOTÃO PRINCIPAL NOVO PRODUTO -->
       <header class="page-header">
         <div>
-          <h2>Gerenciamento de Produtos</h2>
+          <h2 class="gold-text">Gerenciamento de Produtos</h2>
           <p>Consulte, filtre e gerencie peças, categorias, preços e estoque</p>
         </div>
 
         <div class="header-actions">
-          <button mat-stroked-button class="btn-secondary-action" (click)="openImportDialog()">
+          <button mat-stroked-button class="btn-secondary-gold" (click)="openImportDialog()">
             <mat-icon>file_upload</mat-icon>
             <span>Importar Estoque</span>
           </button>
 
-          <button mat-raised-button color="primary" class="btn-primary-action" (click)="openCreateDialog()">
+          <button mat-raised-button color="primary" class="btn-primary-gold" (click)="openCreateDialog()">
             <mat-icon>add</mat-icon>
             <span>Novo Produto</span>
           </button>
@@ -54,7 +54,7 @@ import { InventoryImportDialogComponent } from '../inventory-import-dialog/inven
       </header>
 
       <!-- BARRA DE BUSCA E FILTROS -->
-      <div class="toolbar-section corporate-card">
+      <div class="toolbar-section glass-card">
         <mat-form-field appearance="outline" class="search-field">
           <mat-label>Buscar Produto por Nome, SKU, Tipo ou Categoria...</mat-label>
           <input matInput (keyup)="applyFilter($event)" placeholder="Ex: Anel Solitário, SKU-001..." #input />
@@ -62,8 +62,8 @@ import { InventoryImportDialogComponent } from '../inventory-import-dialog/inven
         </mat-form-field>
       </div>
 
-      <!-- TABELA DE DADOS CORPORATIVA (MAT-TABLE) -->
-      <div class="table-container corporate-card">
+      <!-- TABELA DE DADOS CORPORATIVA DARK & GOLD (MAT-TABLE) -->
+      <div class="table-container glass-card">
         <table mat-table [dataSource]="dataSource" matSort class="full-width-table">
           
           <!-- 1. COLUNA FOTO -->
@@ -74,7 +74,7 @@ import { InventoryImportDialogComponent } from '../inventory-import-dialog/inven
                 <img [src]="element.imageUrl" (error)="onImageError(element.id)" alt="Foto" class="product-thumb" />
               } @else {
                 <div class="thumb-placeholder" matTooltip="Sem Imagem">
-                  <mat-icon>diamond</mat-icon>
+                  <mat-icon class="gold-icon">diamond</mat-icon>
                 </div>
               }
             </td>
@@ -164,34 +164,35 @@ import { InventoryImportDialogComponent } from '../inventory-import-dialog/inven
     .product-management-container { display: flex; flex-direction: column; gap: 1.2rem; }
 
     .page-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
-    .page-header h2 { font-size: 1.6rem; font-weight: 800; color: #0B3C4D; margin: 0; }
-    .page-header p { color: #64748B; margin: 0.2rem 0 0; font-size: 0.95rem; }
+    .gold-text { font-size: 1.8rem; font-weight: 700; color: #D4AF37; margin: 0; }
+    .page-header p { color: #94A3B8; margin: 0.2rem 0 0; font-size: 0.95rem; }
     .header-actions { display: flex; gap: 0.8rem; }
-    .btn-primary-action { background: #0B3C4D !important; color: #FFFFFF !important; font-weight: 700; height: 42px; border-radius: 8px; }
-    .btn-secondary-action { border-color: #0B3C4D !important; color: #0B3C4D !important; font-weight: 600; height: 42px; border-radius: 8px; }
+    .btn-primary-gold { background: linear-gradient(135deg, #D4AF37 0%, #B28B29 100%) !important; color: #1A1C1E !important; font-weight: 700; height: 42px; border-radius: 8px; }
+    .btn-secondary-gold { border-color: rgba(212, 175, 55, 0.4) !important; color: #D4AF37 !important; font-weight: 600; height: 42px; border-radius: 8px; }
 
-    .toolbar-section { padding: 1rem 1.2rem; display: flex; align-items: center; gap: 1rem; }
+    .toolbar-section { padding: 1rem 1.2rem; display: flex; align-items: center; gap: 1rem; background: #2A2D30; border: 1px solid rgba(212, 175, 55, 0.2); border-radius: 12px; }
     .search-field { width: 100%; margin-bottom: -1.25em; }
 
-    .table-container { padding: 0.5rem; border-radius: 12px; overflow-x: auto; background: #FFFFFF; border: 1px solid #E2E8F0; }
-    .full-width-table { width: 100%; }
+    .table-container { padding: 0.5rem; border-radius: 12px; overflow-x: auto; background: #2A2D30; border: 1px solid rgba(212, 175, 55, 0.2); }
+    .full-width-table { width: 100%; background: transparent !important; }
 
-    .product-thumb { width: 44px; height: 44px; border-radius: 8px; object-fit: cover; border: 1px solid #E2E8F0; }
-    .thumb-placeholder { width: 44px; height: 44px; border-radius: 8px; background: #F1F5F9; display: flex; align-items: center; justify-content: center; color: #94A3B8; }
-    .sku-cell { font-family: monospace; font-weight: 600; color: #64748B; }
-    .name-cell { color: #0F172A; }
+    .product-thumb { width: 44px; height: 44px; border-radius: 8px; object-fit: cover; border: 1px solid rgba(212, 175, 55, 0.3); }
+    .thumb-placeholder { width: 44px; height: 44px; border-radius: 8px; background: rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center; }
+    .gold-icon { color: #D4AF37; }
+    .sku-cell { font-family: monospace; font-weight: 600; color: #94A3B8; }
+    .name-cell { color: #E2E2E6; }
 
     .badge { padding: 0.25rem 0.6rem; border-radius: 12px; font-size: 0.8rem; font-weight: 600; }
-    .badge-type { background: rgba(11, 60, 77, 0.08); color: #0B3C4D; }
-    .badge-category { background: rgba(20, 184, 166, 0.12); color: #0D9488; }
+    .badge-type { background: rgba(212, 175, 55, 0.15); color: #D4AF37; border: 1px solid rgba(212, 175, 55, 0.3); }
+    .badge-category { background: rgba(46, 139, 87, 0.15); color: #2E8B57; border: 1px solid rgba(46, 139, 87, 0.3); }
 
-    .stock-ok { color: #059669; font-weight: 700; }
-    .stock-zero { color: #DC2626; font-weight: 700; }
-    .price-cell { font-weight: 700; color: #0B3C4D; }
+    .stock-ok { color: #2E8B57; font-weight: 700; }
+    .stock-zero { color: #EF4444; font-weight: 700; }
+    .price-cell { font-weight: 700; color: #D4AF37; }
 
     .actions-cell { white-space: nowrap; }
     .actions-wrapper { display: inline-flex; align-items: center; gap: 0.2rem; }
-    .no-data-cell { text-align: center; padding: 3rem; color: #64748B; }
+    .no-data-cell { text-align: center; padding: 3rem; color: #94A3B8; }
   `]
 })
 export class ProductListComponent implements OnInit, AfterViewInit {

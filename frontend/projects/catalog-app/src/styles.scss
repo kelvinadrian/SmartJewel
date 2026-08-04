@@ -1,9 +1,9 @@
-// Luxury Jewelry Color System for SmartJewel Catalog App
+// Unified Dark & Gold Luxury Jewelry Theme for SmartJewel Workspace
 @use '@angular/material' as mat;
 
 @include mat.core();
 
-// Primary: Ouro Nobre (#D4AF37)
+// Primary Palette: Ouro Nobre (#D4AF37)
 $ouro-nobre-palette: (
   50: #faf6e8,
   100: #f2e7c5,
@@ -28,7 +28,7 @@ $ouro-nobre-palette: (
   )
 );
 
-// Secondary: Esmeralda (#2E8B57)
+// Secondary Palette: Esmeralda Nobre (#2E8B57)
 $esmeralda-palette: (
   50: #e6f4ed,
   100: #c1e4d3,
@@ -47,31 +47,72 @@ $esmeralda-palette: (
   )
 );
 
-$catalog-primary: mat.m2-define-palette($ouro-nobre-palette, 500);
-$catalog-accent: mat.m2-define-palette($esmeralda-palette, 500);
+$app-primary: mat.m2-define-palette($ouro-nobre-palette, 500);
+$app-accent: mat.m2-define-palette($esmeralda-palette, 500);
 
-$catalog-theme: mat.m2-define-dark-theme((
+$dark-gold-theme: mat.m2-define-dark-theme((
   color: (
-    primary: $catalog-primary,
-    accent: $catalog-accent
+    primary: $app-primary,
+    accent: $app-accent
   )
 ));
 
-@include mat.all-component-themes($catalog-theme);
+@include mat.all-component-themes($dark-gold-theme);
 
-/* Global Luxury Styling & Lead-Gray Surface System */
+/* Global Base Styling: Dark Surface System */
 html, body {
   height: 100%;
   margin: 0;
-  font-family: 'Outfit', 'Roboto', 'Segoe UI', sans-serif;
+  font-family: 'Outfit', 'Inter', 'Roboto', sans-serif;
   background-color: #1A1C1E; /* Cinza-Chumbo Fundo Base */
   color: #E2E2E6; /* Off-White Texto Principal */
+  -webkit-font-smoothing: antialiased;
 }
 
-/* Glassmorphism Card com fundo Cinza-Chumbo Luxo e borda Ouro Nobre sutil */
-.glass-card {
-  background: #2A2D30; /* Cinza-Chumbo Cards */
-  border: 1px solid rgba(212, 175, 55, 0.18);
-  border-radius: 16px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+/* Glassmorphism & Surface Cards */
+.glass-card, .corporate-card {
+  background: #2A2D30;
+  border: 1px solid rgba(212, 175, 55, 0.2);
+  border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+
+.gold-text {
+  color: #D4AF37;
+  font-weight: 700;
+}
+
+/* Custom Angular Material Dark Components Override */
+.mat-mdc-table {
+  background: transparent !important;
+  color: #E2E2E6 !important;
+}
+
+.mat-mdc-header-cell {
+  color: #D4AF37 !important;
+  font-weight: 700 !important;
+  border-bottom-color: rgba(212, 175, 55, 0.2) !important;
+}
+
+.mat-mdc-cell {
+  color: #E2E2E6 !important;
+  border-bottom-color: rgba(255, 255, 255, 0.06) !important;
+}
+
+.mat-mdc-paginator {
+  background: transparent !important;
+  color: #94A3B8 !important;
+}
+
+.mat-mdc-dialog-container .mdc-dialog__surface {
+  background-color: #2A2D30 !important;
+  color: #E2E2E6 !important;
+  border: 1px solid rgba(212, 175, 55, 0.3) !important;
+  border-radius: 16px !important;
+}
+
+/* Custom Snackbars */
+.mat-mdc-snack-bar-container {
+  --mdc-snackbar-container-color: #2A2D30;
+  --mdc-snackbar-supporting-text-color: #E2E2E6;
 }

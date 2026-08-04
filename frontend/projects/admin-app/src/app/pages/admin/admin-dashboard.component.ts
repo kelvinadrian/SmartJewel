@@ -49,7 +49,7 @@ import { ProductListComponent } from './components/product-list/product-list.com
     ProductListComponent
   ],
   template: `
-    <!-- BARRA SUPERIOR (TOPBAR / TOOLBAR) -->
+    <!-- BARRA SUPERIOR (TOPBAR / TOOLBAR DARK & GOLD) -->
     <mat-toolbar class="admin-topbar">
       <div class="topbar-left">
         <mat-icon class="brand-logo">diamond</mat-icon>
@@ -60,7 +60,7 @@ import { ProductListComponent } from './components/product-list/product-list.com
 
       <div class="topbar-right">
         <div class="user-chip">
-          <mat-icon>account_circle</mat-icon>
+          <mat-icon class="gold-icon">account_circle</mat-icon>
           <span>Lojista Admin</span>
         </div>
         <button mat-stroked-button class="logout-btn" (click)="logout()" matTooltip="Sair do Sistema">
@@ -70,7 +70,7 @@ import { ProductListComponent } from './components/product-list/product-list.com
       </div>
     </mat-toolbar>
 
-    <!-- CONTAINER SIDENAV (MENU LATERAL FIXO À ESQUERDA) -->
+    <!-- CONTAINER SIDENAV (MENU LATERAL FIXO À ESQUERDA DARK & GOLD) -->
     <mat-sidenav-container class="admin-sidenav-container">
       <mat-sidenav mode="side" opened class="admin-sidebar">
         <div class="sidebar-header-section">
@@ -139,7 +139,7 @@ import { ProductListComponent } from './components/product-list/product-list.com
         </div>
       </mat-sidenav>
 
-      <!-- CONTEÚDO PRINCIPAL DAS ABAS -->
+      <!-- CONTEÚDO PRINCIPAL DAS ABAS DO DASHBOARD -->
       <mat-sidenav-content class="admin-main-content">
         <div class="admin-container">
 
@@ -147,10 +147,10 @@ import { ProductListComponent } from './components/product-list/product-list.com
           @if (activeTab === 'dashboard') {
             <header class="page-header">
               <div>
-                <h2>Visão Geral do Catálogo</h2>
-                <p>Métricas e estatísticas em tempo real do estoque de semijoias</p>
+                <h2 class="gold-text">Visão Geral do Catálogo</h2>
+                <p>Métricas e estatísticas em tempo real do estoque de alta joalheria</p>
               </div>
-              <button mat-raised-button color="primary" class="btn-primary-action" (click)="openCreateDialog()">
+              <button mat-raised-button color="primary" class="btn-primary-gold" (click)="openCreateDialog()">
                 <mat-icon>add</mat-icon>
                 <span>Novo Produto</span>
               </button>
@@ -158,23 +158,23 @@ import { ProductListComponent } from './components/product-list/product-list.com
 
             <div class="kpi-grid">
               <div class="kpi-card corporate-card">
-                <div class="kpi-icon-wrapper petroleum">
+                <div class="kpi-icon-wrapper gold">
                   <mat-icon>inventory_2</mat-icon>
                 </div>
                 <div class="kpi-info">
                   <span class="kpi-title">Total de Produtos</span>
-                  <strong class="kpi-value">{{ dataSource.data.length }}</strong>
+                  <strong class="kpi-value gold-text">{{ dataSource.data.length }}</strong>
                   <span class="kpi-sub">{{ totalStockUnits }} unidades em estoque</span>
                 </div>
               </div>
 
               <div class="kpi-card corporate-card">
-                <div class="kpi-icon-wrapper teal">
+                <div class="kpi-icon-wrapper emerald">
                   <mat-icon>attach_money</mat-icon>
                 </div>
                 <div class="kpi-info">
                   <span class="kpi-title">Valor em Estoque</span>
-                  <strong class="kpi-value">{{ totalStockValue | currency:'BRL':'symbol':'1.2-2' }}</strong>
+                  <strong class="kpi-value gold-text">{{ totalStockValue | currency:'BRL':'symbol':'1.2-2' }}</strong>
                   <span class="kpi-sub">Preço total cadastrado</span>
                 </div>
               </div>
@@ -185,7 +185,7 @@ import { ProductListComponent } from './components/product-list/product-list.com
                 </div>
                 <div class="kpi-info">
                   <span class="kpi-title">Estoque Baixo / Crítico</span>
-                  <strong class="kpi-value">{{ lowStockProducts.length }}</strong>
+                  <strong class="kpi-value warn-text">{{ lowStockProducts.length }}</strong>
                   <span class="kpi-sub">Menos de 5 unidades em estoque</span>
                 </div>
               </div>
@@ -195,7 +195,7 @@ import { ProductListComponent } from './components/product-list/product-list.com
               <div class="section-card corporate-card">
                 <div class="card-header-flex">
                   <div>
-                    <h3>Ações Rápidas de Gestão</h3>
+                    <h3 class="gold-text">Ações Rápidas de Gestão</h3>
                     <p>Atalhos operacionais para administração da loja</p>
                   </div>
                 </div>
@@ -225,7 +225,7 @@ import { ProductListComponent } from './components/product-list/product-list.com
 
               <!-- TABELA DE ALERTA DE ESTOQUE BAIXO -->
               <div class="section-card corporate-card">
-                <h3>Alertas de Reposição de Estoque</h3>
+                <h3 class="gold-text">Alertas de Reposição de Estoque</h3>
                 <p>Produtos que precisam de reposição imediata</p>
 
                 @if (lowStockProducts.length > 0) {
@@ -268,7 +268,7 @@ import { ProductListComponent } from './components/product-list/product-list.com
           }
 
           <!-- VISÃO 2: GERENCIAR PRODUTOS -->
-          @if (activeTab === 'products') {
+          @else if (activeTab === 'products') {
             <app-product-list></app-product-list>
           }
 
@@ -291,43 +291,44 @@ import { ProductListComponent } from './components/product-list/product-list.com
     </mat-sidenav-container>
   `,
   styles: [`
-    /* BARRA SUPERIOR (TOOLBAR - PETROLEUM BLUE) */
+    /* BARRA SUPERIOR (TOOLBAR - DARK & GOLD) */
     .admin-topbar {
-      background: linear-gradient(135deg, #0B3C4D 0%, #0F4C5C 100%) !important;
-      color: #FFFFFF !important;
+      background: #25282A !important;
+      color: #E2E2E6 !important;
       height: 64px;
       display: flex;
       justify-content: space-between;
       align-items: center;
       padding: 0 1.5rem;
-      box-shadow: 0 2px 10px rgba(11, 60, 77, 0.15);
+      border-bottom: 1px solid rgba(212, 175, 55, 0.2);
       z-index: 100;
       position: relative;
     }
     .topbar-left { display: flex; align-items: center; gap: 0.6rem; }
-    .brand-logo { color: #14B8A6; font-size: 1.8rem; width: 1.8rem; height: 1.8rem; }
-    .brand-title { font-size: 1.3rem; font-weight: 800; letter-spacing: -0.5px; color: #FFFFFF; }
-    .topbar-divider { color: rgba(255,255,255,0.3); margin: 0 0.3rem; }
+    .brand-logo { color: #D4AF37; font-size: 1.8rem; width: 1.8rem; height: 1.8rem; }
+    .brand-title { font-size: 1.3rem; font-weight: 800; letter-spacing: -0.5px; color: #D4AF37; }
+    .topbar-divider { color: rgba(212, 175, 55, 0.3); margin: 0 0.3rem; }
     .topbar-subtitle { font-size: 0.95rem; font-weight: 500; color: #94A3B8; }
 
     .topbar-right { display: flex; align-items: center; gap: 1rem; }
-    .user-chip { display: flex; align-items: center; gap: 0.4rem; font-size: 0.85rem; font-weight: 600; color: #E2E8F0; background: rgba(255,255,255,0.1); padding: 0.3rem 0.8rem; border-radius: 20px; }
-    .logout-btn { color: #FFFFFF !important; border-color: rgba(255,255,255,0.3) !important; font-weight: 600; border-radius: 8px; }
-    .logout-btn:hover { background: rgba(255,255,255,0.1) !important; }
+    .user-chip { display: flex; align-items: center; gap: 0.4rem; font-size: 0.85rem; font-weight: 600; color: #E2E2E6; background: rgba(255,255,255,0.05); padding: 0.3rem 0.8rem; border-radius: 20px; border: 1px solid rgba(212, 175, 55, 0.2); }
+    .gold-icon { color: #D4AF37; }
+    .logout-btn { color: #D4AF37 !important; border-color: rgba(212, 175, 55, 0.3) !important; font-weight: 600; border-radius: 8px; }
+    .logout-btn:hover { background: rgba(212, 175, 55, 0.1) !important; }
 
-    /* CONTAINER SIDENAV & MENU LATERAL */
-    .admin-sidenav-container { height: calc(100vh - 64px); background-color: #F8FAFC; }
+    /* CONTAINER SIDENAV & MENU LATERAL DARK & GOLD */
+    .admin-sidenav-container { height: calc(100vh - 64px); background-color: #1A1C1E; }
     .admin-sidebar {
       width: 250px;
-      background: #072E3C !important;
-      color: #E2E8F0 !important;
-      border-right: 1px solid rgba(15, 76, 92, 0.3);
+      background: #1E2022 !important;
+      color: #E2E2E6 !important;
+      border-right: 1px solid rgba(212, 175, 55, 0.2);
       display: flex;
       flex-direction: column;
     }
 
     .sidebar-header-section { padding: 1.2rem 1.2rem 0.5rem; }
-    .menu-label { font-size: 0.7rem; font-weight: 700; color: #64748B; letter-spacing: 1px; }
+    .menu-label { font-size: 0.7rem; font-weight: 700; color: #D4AF37; letter-spacing: 1px; }
 
     .sidebar-nav-list { padding: 0.5rem; }
     .sidebar-nav-list a {
@@ -339,94 +340,62 @@ import { ProductListComponent } from './components/product-list/product-list.com
       cursor: pointer;
     }
     .sidebar-nav-list a:hover {
-      background: rgba(20, 184, 166, 0.12) !important;
-      color: #14B8A6 !important;
+      background: rgba(212, 175, 55, 0.15) !important;
+      color: #D4AF37 !important;
     }
     .sidebar-nav-list a.active-nav-item {
-      background: #14B8A6 !important;
-      color: #FFFFFF !important;
+      background: linear-gradient(135deg, #D4AF37 0%, #B28B29 100%) !important;
+      color: #1A1C1E !important;
       font-weight: 700;
     }
-    .sidebar-nav-list a.active-nav-item .nav-item-icon { color: #FFFFFF !important; }
-    .nav-item-icon { color: #94A3B8; }
-    .import-nav-item { border-top: 1px solid rgba(255,255,255,0.08); margin-top: 0.8rem !important; }
+    .sidebar-nav-list a.active-nav-item .nav-item-icon { color: #1A1C1E !important; }
+    .nav-item-icon { color: #D4AF37; }
+    .import-nav-item { border-top: 1px solid rgba(212, 175, 55, 0.15); margin-top: 0.8rem !important; }
 
-    .sidebar-footer { margin-top: auto; padding: 1.2rem; border-top: 1px solid rgba(255,255,255,0.08); font-size: 0.75rem; color: #64748B; }
-    .status-online { display: flex; align-items: center; gap: 0.4rem; color: #14B8A6; margin: 0.2rem 0 0; }
-    .dot { width: 8px; height: 8px; border-radius: 50%; background: #14B8A6; display: inline-block; }
+    .sidebar-footer { margin-top: auto; padding: 1.2rem; border-top: 1px solid rgba(212, 175, 55, 0.15); font-size: 0.75rem; color: #94A3B8; }
+    .status-online { display: flex; align-items: center; gap: 0.4rem; color: #D4AF37; margin: 0.2rem 0 0; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: #D4AF37; display: inline-block; }
 
     /* CONTEÚDO PRINCIPAL */
-    .admin-main-content { padding: 1.5rem 2rem; }
+    .admin-main-content { padding: 1.5rem 2rem; background: #1A1C1E; }
     .admin-container { max-width: 1280px; margin: 0 auto 3rem; }
 
     .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; }
-    .page-header h2 { font-size: 1.6rem; font-weight: 800; color: #0B3C4D; margin: 0; }
-    .page-header p { color: #64748B; margin: 0.2rem 0 0; font-size: 0.95rem; }
-    .header-actions { display: flex; gap: 0.8rem; }
-    .btn-primary-action { background: #0B3C4D !important; color: #FFFFFF !important; font-weight: 700; height: 42px; border-radius: 8px; }
-    .btn-secondary-action { border-color: #0B3C4D !important; color: #0B3C4D !important; font-weight: 600; height: 42px; border-radius: 8px; }
+    .page-header h2 { font-size: 1.6rem; font-weight: 800; margin: 0; }
+    .page-header p { color: #94A3B8; margin: 0.2rem 0 0; font-size: 0.95rem; }
+    .btn-primary-gold { background: linear-gradient(135deg, #D4AF37 0%, #B28B29 100%) !important; color: #1A1C1E !important; font-weight: 700; height: 42px; border-radius: 8px; }
 
     /* KPIS DO DASHBOARD */
     .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.2rem; margin-bottom: 1.8rem; }
-    .kpi-card { padding: 1.4rem; display: flex; align-items: center; gap: 1.2rem; }
+    .kpi-card { padding: 1.4rem; display: flex; align-items: center; gap: 1.2rem; background: #2A2D30; border: 1px solid rgba(212, 175, 55, 0.2); }
     .kpi-icon-wrapper { width: 52px; height: 52px; border-radius: 12px; display: flex; align-items: center; justify-content: center; }
-    .kpi-icon-wrapper.petroleum { background: rgba(11, 60, 77, 0.1); color: #0B3C4D; }
-    .kpi-icon-wrapper.teal { background: rgba(20, 184, 166, 0.1); color: #0D9488; }
-    .kpi-icon-wrapper.warn { background: rgba(239, 68, 68, 0.1); color: #EF4444; }
+    .kpi-icon-wrapper.gold { background: rgba(212, 175, 55, 0.15); color: #D4AF37; }
+    .kpi-icon-wrapper.emerald { background: rgba(46, 139, 87, 0.15); color: #2E8B57; }
+    .kpi-icon-wrapper.warn { background: rgba(239, 68, 68, 0.15); color: #EF4444; }
     .kpi-info { display: flex; flex-direction: column; }
-    .kpi-title { font-size: 0.85rem; color: #64748B; font-weight: 600; text-transform: uppercase; }
-    .kpi-value { font-size: 1.6rem; font-weight: 800; color: #0F172A; }
+    .kpi-title { font-size: 0.85rem; color: #94A3B8; font-weight: 600; text-transform: uppercase; }
+    .kpi-value { font-size: 1.6rem; font-weight: 800; }
+    .warn-text { color: #EF4444; }
     .kpi-sub { font-size: 0.8rem; color: #94A3B8; }
 
     /* DASHBOARD SECTIONS */
     .dashboard-sections { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
     @media (max-width: 960px) { .dashboard-sections { grid-template-columns: 1fr; } }
-    .section-card { padding: 1.4rem; }
-    .section-card h3 { font-size: 1.2rem; font-weight: 700; color: #0B3C4D; margin: 0; }
-    .section-card p { font-size: 0.85rem; color: #64748B; margin: 0.2rem 0 1rem; }
+    .section-card { padding: 1.4rem; background: #2A2D30; border: 1px solid rgba(212, 175, 55, 0.2); }
+    .section-card h3 { font-size: 1.2rem; font-weight: 700; margin: 0; }
+    .section-card p { font-size: 0.85rem; color: #94A3B8; margin: 0.2rem 0 1rem; }
 
     .quick-actions-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; }
-    .action-tile { height: 70px; display: flex; flex-direction: column; align-items: center; justify-content: center; border-color: #E2E8F0 !important; border-radius: 10px; font-weight: 600; color: #0F172A !important; gap: 0.3rem; }
-    .action-tile:hover { background: rgba(11, 60, 77, 0.04) !important; border-color: #0B3C4D !important; }
+    .action-tile { height: 70px; display: flex; flex-direction: column; align-items: center; justify-content: center; border-color: rgba(212, 175, 55, 0.2) !important; border-radius: 10px; font-weight: 600; color: #E2E2E6 !important; gap: 0.3rem; }
+    .action-tile:hover { background: rgba(212, 175, 55, 0.1) !important; border-color: #D4AF37 !important; }
 
     /* TABELA DE ALERTA */
     .alert-table { width: 100%; border-collapse: collapse; margin-top: 0.5rem; }
-    .alert-table th { text-align: left; padding: 0.6rem; font-size: 0.8rem; color: #64748B; border-bottom: 1px solid #E2E8F0; }
-    .alert-table td { padding: 0.6rem; font-size: 0.85rem; border-bottom: 1px solid #F1F5F9; vertical-align: middle; }
-    .badge-zero { background: rgba(239, 68, 68, 0.15); color: #DC2626; font-weight: 700; padding: 0.2rem 0.5rem; border-radius: 6px; }
-    .badge-low { background: rgba(245, 158, 11, 0.15); color: #D97706; font-weight: 700; padding: 0.2rem 0.5rem; border-radius: 6px; }
-    .empty-alert { text-align: center; padding: 2rem; color: #0D9488; display: flex; flex-direction: column; align-items: center; gap: 0.5rem; }
-
-    /* TABELA PRINCIPAL DE PRODUTOS */
-    .toolbar-section { padding: 1rem 1.2rem; display: flex; align-items: center; gap: 1rem; margin-bottom: 1.2rem; }
-    .search-field { flex: 1; margin-bottom: -1.25em; }
-    .table-container { padding: 0.5rem; border-radius: 12px; overflow-x: auto; }
-    .full-width-table { width: 100%; }
-    .product-thumb { width: 44px; height: 44px; border-radius: 6px; object-fit: cover; border: 1px solid #E2E8F0; }
-    .thumb-placeholder { width: 44px; height: 44px; border-radius: 6px; background: #F1F5F9; display: flex; align-items: center; justify-content: center; color: #94A3B8; }
-    .sku-cell { font-family: monospace; font-weight: 600; color: #64748B; }
-    .badge { padding: 0.25rem 0.6rem; border-radius: 12px; font-size: 0.8rem; font-weight: 600; }
-    .badge-type { background: rgba(11, 60, 77, 0.08); color: #0B3C4D; }
-    .badge-material { background: rgba(20, 184, 166, 0.12); color: #0D9488; }
-    .stock-ok { color: #059669; font-weight: 700; }
-    .stock-zero { color: #DC2626; font-weight: 700; }
-    .price-cell { font-weight: 700; color: #0B3C4D; }
-    .actions-cell { white-space: nowrap; }
-
-    /* MODO GRID */
-    .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 1.2rem; }
-    .product-card { display: flex; flex-direction: column; overflow: hidden; }
-    .card-image-container { height: 160px; position: relative; background: #F1F5F9; }
-    .card-image { width: 100%; height: 100%; object-fit: cover; }
-    .card-image-placeholder { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #94A3B8; gap: 0.4rem; }
-    .stock-badge { position: absolute; top: 8px; right: 8px; padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: 700; }
-    .stock-ok-badge { background: #059669; color: #FFFFFF; }
-    .stock-zero-badge { background: #DC2626; color: #FFFFFF; }
-    .card-body { padding: 1rem; flex: 1; display: flex; flex-direction: column; gap: 0.4rem; }
-    .card-title { font-size: 1rem; font-weight: 700; color: #0F172A; margin: 0; }
-    .card-price { font-size: 1.2rem; font-weight: 800; color: #0B3C4D; margin-top: auto; padding-top: 0.4rem; }
-    .card-actions { padding: 0.8rem 1rem; background: #F8FAFC; border-top: 1px solid #E2E8F0; display: flex; align-items: center; justify-content: space-between; gap: 0.4rem; }
-    .no-data-card { grid-column: 1 / -1; padding: 3rem; text-align: center; color: #64748B; display: flex; flex-direction: column; align-items: center; gap: 0.8rem; }
+    .alert-table th { text-align: left; padding: 0.6rem; font-size: 0.8rem; color: #D4AF37; border-bottom: 1px solid rgba(212, 175, 55, 0.2); }
+    .alert-table td { padding: 0.6rem; font-size: 0.85rem; border-bottom: 1px solid rgba(255, 255, 255, 0.05); color: #E2E2E6; vertical-align: middle; }
+    .badge-zero { background: rgba(239, 68, 68, 0.2); color: #EF4444; font-weight: 700; padding: 0.2rem 0.5rem; border-radius: 6px; }
+    .badge-low { background: rgba(245, 158, 11, 0.2); color: #F59E0B; font-weight: 700; padding: 0.2rem 0.5rem; border-radius: 6px; }
+    .empty-alert { text-align: center; padding: 2rem; color: #D4AF37; display: flex; flex-direction: column; align-items: center; gap: 0.5rem; }
   `]
 })
 export class AdminDashboardComponent implements OnInit, AfterViewInit {

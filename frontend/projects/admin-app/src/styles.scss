@@ -1,86 +1,118 @@
-// Petroleum Blue Corporate Theme for SmartJewel Admin App
+// Unified Dark & Gold Luxury Jewelry Theme for SmartJewel Workspace
 @use '@angular/material' as mat;
 
 @include mat.core();
 
-// Palette: Azul Petróleo (#0B3C4D)
-$petroleum-blue-palette: (
-  50: #e6f4f8,
-  100: #bce3ee,
-  200: #8ed0e2,
-  300: #60bdd6,
-  400: #3eaecd,
-  500: #0B3C4D,
-  600: #093646,
-  700: #072e3c,
-  800: #052633,
-  900: #021822,
+// Primary Palette: Ouro Nobre (#D4AF37)
+$ouro-nobre-palette: (
+  50: #faf6e8,
+  100: #f2e7c5,
+  200: #e9d79e,
+  300: #e0c776,
+  400: #daba59,
+  500: #D4AF37,
+  600: #c59f31,
+  700: #b28b29,
+  800: #a07722,
+  900: #815c16,
   contrast: (
-    50: #0F172A,
-    100: #0F172A,
-    200: #0F172A,
-    300: #ffffff,
-    400: #ffffff,
-    500: #ffffff,
+    50: rgba(0,0,0, 0.87),
+    100: rgba(0,0,0, 0.87),
+    200: rgba(0,0,0, 0.87),
+    300: rgba(0,0,0, 0.87),
+    400: #1a1c1e,
+    500: #1a1c1e,
     600: #ffffff,
     700: #ffffff,
-    800: #ffffff,
-    900: #ffffff
+    800: #ffffff
   )
 );
 
-// Accent: Teal (#14B8A6)
-$teal-palette: (
-  50: #ccfbf1,
-  100: #99f6e4,
-  200: #5eead4,
-  300: #2dd4bf,
-  400: #14b8a6,
-  500: #0d9488,
-  600: #0f766e,
-  700: #115e59,
-  800: #134e4a,
-  900: #042f2e,
+// Secondary Palette: Esmeralda Nobre (#2E8B57)
+$esmeralda-palette: (
+  50: #e6f4ed,
+  100: #c1e4d3,
+  200: #98d2b5,
+  300: #6ec097,
+  400: #4fb381,
+  500: #2E8B57,
+  600: #298350,
+  700: #227847,
+  800: #1c6e3e,
+  900: #115c2e,
   contrast: (
-    50: #0F172A,
-    100: #0F172A,
-    200: #0F172A,
+    50: rgba(0,0,0, 0.87),
+    100: rgba(0,0,0, 0.87),
     500: #ffffff
   )
 );
 
-$admin-primary: mat.m2-define-palette($petroleum-blue-palette, 500);
-$admin-accent: mat.m2-define-palette($teal-palette, 400);
+$app-primary: mat.m2-define-palette($ouro-nobre-palette, 500);
+$app-accent: mat.m2-define-palette($esmeralda-palette, 500);
 
-$admin-theme: mat.m2-define-light-theme((
+$dark-gold-theme: mat.m2-define-dark-theme((
   color: (
-    primary: $admin-primary,
-    accent: $admin-accent
+    primary: $app-primary,
+    accent: $app-accent
   )
 ));
 
-@include mat.all-component-themes($admin-theme);
+@include mat.all-component-themes($dark-gold-theme);
 
-/* Global Styling: Petroleum Blue Clean Corporate Theme */
+/* Global Base Styling: Dark Surface System */
 html, body {
   height: 100%;
   margin: 0;
-  font-family: 'Inter', 'Roboto', 'Segoe UI', sans-serif;
-  background-color: #F8FAFC;
-  color: #0F172A;
+  font-family: 'Outfit', 'Inter', 'Roboto', sans-serif;
+  background-color: #1A1C1E; /* Cinza-Chumbo Fundo Base */
+  color: #E2E2E6; /* Off-White Texto Principal */
   -webkit-font-smoothing: antialiased;
 }
 
-/* Glass & Corporate Card Styling */
-.corporate-card {
-  background: #FFFFFF;
-  border: 1px solid #E2E8F0;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(11, 60, 77, 0.05);
+/* Glassmorphism & Surface Cards */
+.glass-card, .corporate-card {
+  background: #2A2D30;
+  border: 1px solid rgba(212, 175, 55, 0.2);
+  border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+
+.gold-text {
+  color: #D4AF37;
+  font-weight: 700;
+}
+
+/* Custom Angular Material Dark Components Override */
+.mat-mdc-table {
+  background: transparent !important;
+  color: #E2E2E6 !important;
+}
+
+.mat-mdc-header-cell {
+  color: #D4AF37 !important;
+  font-weight: 700 !important;
+  border-bottom-color: rgba(212, 175, 55, 0.2) !important;
+}
+
+.mat-mdc-cell {
+  color: #E2E2E6 !important;
+  border-bottom-color: rgba(255, 255, 255, 0.06) !important;
+}
+
+.mat-mdc-paginator {
+  background: transparent !important;
+  color: #94A3B8 !important;
+}
+
+.mat-mdc-dialog-container .mdc-dialog__surface {
+  background-color: #2A2D30 !important;
+  color: #E2E2E6 !important;
+  border: 1px solid rgba(212, 175, 55, 0.3) !important;
+  border-radius: 16px !important;
 }
 
 /* Custom Snackbars */
 .mat-mdc-snack-bar-container {
-  --mdc-snackbar-container-color: #0B3C4D;
-  --mdc-snackbar-supporting-text-color: #FFFFFF;
+  --mdc-snackbar-container-color: #2A2D30;
+  --mdc-snackbar-supporting-text-color: #E2E2E6;
 }
