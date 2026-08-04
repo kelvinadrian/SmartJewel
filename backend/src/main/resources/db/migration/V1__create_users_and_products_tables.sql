@@ -29,5 +29,5 @@ CREATE TABLE IF NOT EXISTS products (
 
 -- Inserção do usuário administrador inicial (senha: admin123 codificada BCrypt) em ANSI SQL
 INSERT INTO users (id, nome, email, senha, role, created_at, created_by)
-SELECT 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'Administrador', 'admin@smartjewel.com', '$2a$10$45TY4W4ztn5g8BkpCLSspuOhxdyGzMrcs5WdC27F5dI2Ibp5oQwkS', 'ADMIN', CURRENT_TIMESTAMP, 'SYSTEM'
+SELECT 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'Administrador', 'admin@smartjewel.com', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'ADMIN', CURRENT_TIMESTAMP, 'SYSTEM'
 WHERE NOT EXISTS (SELECT 1 FROM users WHERE email = 'admin@smartjewel.com');
