@@ -7,7 +7,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { Product, ProductMaterial, ProductType } from '@shared-core';
+import { CategoryService, Category, Subcategory, Product, ProductMaterial, ProductType } from '@shared-core';
 
 export interface ProductDialogData {
   mode: 'create' | 'edit';
@@ -44,6 +44,29 @@ export interface ProductDialogData {
           <mat-label>SKU (Código Único)</mat-label>
           <input matInput formControlName="sku" placeholder="Ex: ANEL-001" />
         </mat-form-field>
+
+        <!-- DROPDOWNS CASCATEADOS DE CATEGORIA E SUBCATEGORIA -->
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="half-width">
+            <mat-label>Categoria Principal</mat-label>
+            <mat-select formControlName="categoryId" (selectionChange)="onCategoryChange($event.value)">
+              <mat-option [value]="null">Nenhuma</mat-option>
+              @for (cat of categories; track cat.id) {
+                <mat-option [value]="cat.id">{{ cat.nome }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="half-width">
+            <mat-label>Subcategoria</mat-label>
+            <mat-select formControlName="subcategoryId">
+              <mat-option [value]="null">Nenhuma</mat-option>
+              @for (sub of availableSubcategories; track sub.id) {
+                <mat-option [value]="sub.id">{{ sub.nome }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </div>
 
         <div class="form-row">
           <mat-form-field appearance="outline" class="half-width">
@@ -115,7 +138,7 @@ export interface ProductDialogData {
   `,
   styles: [`
     .dialog-title { display: flex; align-items: center; gap: 0.5rem; color: #D4AF37; }
-    .dialog-content { min-width: 340px; max-width: 500px; padding-top: 1rem; }
+    .dialog-content { min-width: 360px; max-width: 540px; padding-top: 1rem; }
     .full-width { width: 100%; margin-bottom: 0.5rem; }
     .form-row { display: flex; gap: 1rem; }
     .half-width { flex: 1; margin-bottom: 0.5rem; }
@@ -131,11 +154,15 @@ export class ProductFormDialogComponent implements OnInit {
   dialogRef = inject(MatDialogRef<ProductFormDialogComponent>);
   data: ProductDialogData = inject(MAT_DIALOG_DATA);
   private fb = inject(FormBuilder);
+  private categoryService = inject(CategoryService);
 
   productForm!: FormGroup;
   selectedFile: File | null = null;
   imagePreview: string | null = null;
   formattedPrice: string = 'R$ 0,00';
+
+  categories: Category[] = [];
+  availableSubcategories: Subcategory[] = [];
 
   productTypes: { label: string; value: ProductType }[] = [
     { label: 'Anel', value: 'ANEL' },
@@ -165,6 +192,8 @@ export class ProductFormDialogComponent implements OnInit {
     this.productForm = this.fb.group({
       nome: [p?.nome || '', [Validators.required]],
       sku: [{ value: p?.sku || '', disabled: this.data.mode === 'edit' }, [Validators.required]],
+      categoryId: [p?.categoryId || null],
+      subcategoryId: [p?.subcategoryId || null],
       tipo: [p?.tipo || 'ANEL', [Validators.required]],
       material: [p?.material || 'BANHADO_A_OURO', [Validators.required]],
       preco: [initialPrice, [Validators.required, Validators.min(0.01)]],
@@ -176,6 +205,48 @@ export class ProductFormDialogComponent implements OnInit {
     if (p?.imageUrl) {
       this.imagePreview = p.imageUrl;
     }
+
+    this.loadCategories(p?.categoryId, p?.subcategoryId);
+  }
+
+  loadCategories(initialCategoryId?: string, initialSubcategoryId?: string): void {
+    this.categoryService.getCategories().subscribe({
+      next: (cats) => {
+        this.categories = cats;
+
+        if (initialSubcategoryId && !initialCategoryId) {
+          for (const cat of cats) {
+            if (cat.subcategories && cat.subcategories.some(s => s.id === initialSubcategoryId)) {
+              initialCategoryId = cat.id;
+              break;
+            }
+          }
+        }
+
+        if (initialCategoryId) {
+          this.productForm.get('categoryId')?.setValue(initialCategoryId);
+          this.onCategoryChange(initialCategoryId, false);
+          if (initialSubcategoryId) {
+            this.productForm.get('subcategoryId')?.setValue(initialSubcategoryId);
+          }
+        }
+      },
+      error: () => {}
+    });
+  }
+
+  onCategoryChange(categoryId: string | null, resetSubcategory: boolean = true): void {
+    if (resetSubcategory) {
+      this.productForm.get('subcategoryId')?.setValue(null);
+    }
+
+    if (!categoryId) {
+      this.availableSubcategories = [];
+      return;
+    }
+
+    const selectedCategory = this.categories.find(c => c.id === categoryId);
+    this.availableSubcategories = selectedCategory ? selectedCategory.subcategories || [] : [];
   }
 
   onPriceInput(event: Event): void {
