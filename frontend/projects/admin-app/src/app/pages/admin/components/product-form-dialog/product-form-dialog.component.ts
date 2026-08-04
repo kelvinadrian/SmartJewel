@@ -197,7 +197,8 @@ export class ProductFormDialogComponent implements OnInit {
       tipo: [p?.tipo || 'ANEL', [Validators.required]],
       material: [p?.material || 'BANHADO_A_OURO', [Validators.required]],
       preco: [initialPrice, [Validators.required, Validators.min(0.01)]],
-      quantidadeEstoque: [p?.quantidadeEstoque || 0, [Validators.min(0)]]
+      quantidadeEstoque: [p?.quantidadeEstoque || 0, [Validators.min(0)]],
+      imageUrl: [p?.imageUrl || null]
     });
 
     this.updateFormattedPrice(initialPrice);

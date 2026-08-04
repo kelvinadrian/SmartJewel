@@ -77,7 +77,9 @@ public class ProductService {
         product.setTipo(request.getTipo());
         product.setMaterial(request.getMaterial());
         product.setSubcategory(subcategory);
-        product.setImageUrl(request.getImageUrl());
+        if (request.getImageUrl() != null && !request.getImageUrl().isBlank()) {
+            product.setImageUrl(request.getImageUrl());
+        }
         product.setPreco(request.getPreco());
 
         Product updatedProduct = productRepository.save(product);
