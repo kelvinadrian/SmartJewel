@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { API_URL } from '../config/api.config';
-import { Product, ProductMaterial, ProductType } from '../models/product.model';
+import { Product } from '../models/product.model';
 import { Page } from '../models/catalog.model';
 
 @Injectable({
@@ -13,10 +13,9 @@ export class CatalogService {
   private apiUrl = `${API_URL}/catalog`;
 
   getCatalog(
-    tipo?: ProductType | null,
-    material?: ProductMaterial | null,
+    productTypeId?: string | null,
     categoryId?: string | null,
-    subcategoryId?: string | null,
+    materialColorId?: string | null,
     page: number = 0,
     size: number = 12
   ): Observable<Page<Product>> {
@@ -25,17 +24,14 @@ export class CatalogService {
       .set('size', size.toString())
       .set('sort', 'createdAt,desc');
 
-    if (tipo) {
-      params = params.set('tipo', tipo);
-    }
-    if (material) {
-      params = params.set('material', material);
+    if (productTypeId) {
+      params = params.set('productTypeId', productTypeId);
     }
     if (categoryId) {
       params = params.set('categoryId', categoryId);
     }
-    if (subcategoryId) {
-      params = params.set('subcategoryId', subcategoryId);
+    if (materialColorId) {
+      params = params.set('materialColorId', materialColorId);
     }
 
     return this.http.get<Page<Product>>(this.apiUrl, { params });

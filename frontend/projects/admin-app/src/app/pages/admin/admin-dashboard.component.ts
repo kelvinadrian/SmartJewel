@@ -18,6 +18,8 @@ import { ProductFormDialogComponent } from './components/product-form-dialog/pro
 import { StockDialogComponent } from './components/stock-dialog/stock-dialog.component';
 import { InventoryImportDialogComponent } from './components/inventory-import-dialog/inventory-import-dialog.component';
 import { CategoryListComponent } from './components/category-list/category-list.component';
+import { ProductTypeListComponent } from './components/product-type-list/product-type-list.component';
+import { MaterialColorListComponent } from './components/material-color-list/material-color-list.component';
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -37,7 +39,9 @@ import { CategoryListComponent } from './components/category-list/category-list.
     MatButtonToggleModule,
     MatSidenavModule,
     MatListModule,
-    CategoryListComponent
+    CategoryListComponent,
+    ProductTypeListComponent,
+    MaterialColorListComponent
   ],
   template: `
     <mat-sidenav-container class="admin-sidenav-container">
@@ -64,8 +68,26 @@ import { CategoryListComponent } from './components/category-list/category-list.
             [class.active-nav-item]="activeTab === 'categories'"
             (click)="activeTab = 'categories'"
           >
-            <mat-icon matListItemIcon class="nav-item-icon">category</mat-icon>
+            <mat-icon matListItemIcon class="nav-item-icon">label</mat-icon>
             <span matListItemTitle>Categorias</span>
+          </a>
+
+          <a
+            mat-list-item
+            [class.active-nav-item]="activeTab === 'product-types'"
+            (click)="activeTab = 'product-types'"
+          >
+            <mat-icon matListItemIcon class="nav-item-icon">category</mat-icon>
+            <span matListItemTitle>Tipos de Produto</span>
+          </a>
+
+          <a
+            mat-list-item
+            [class.active-nav-item]="activeTab === 'material-colors'"
+            (click)="activeTab = 'material-colors'"
+          >
+            <mat-icon matListItemIcon class="nav-item-icon">palette</mat-icon>
+            <span matListItemTitle>Materiais e Cores</span>
           </a>
         </mat-nav-list>
       </mat-sidenav>
@@ -138,14 +160,14 @@ import { CategoryListComponent } from './components/category-list/category-list.
                   <ng-container matColumnDef="tipo">
                     <th mat-header-cell *matHeaderCellDef mat-sort-header>Tipo</th>
                     <td mat-cell *matCellDef="let element">
-                      <span class="badge badge-tipo">{{ element.tipo }}</span>
+                      <span class="badge badge-tipo">{{ element.productTypeNome || 'Sem Tipo' }}</span>
                     </td>
                   </ng-container>
 
                   <ng-container matColumnDef="material">
                     <th mat-header-cell *matHeaderCellDef mat-sort-header>Material</th>
                     <td mat-cell *matCellDef="let element">
-                      <span class="badge badge-material">{{ element.material }}</span>
+                      <span class="badge badge-material">{{ element.materialColorNome || 'Sem Material' }}</span>
                     </td>
                   </ng-container>
 
@@ -214,11 +236,11 @@ import { CategoryListComponent } from './components/category-list/category-list.
                     <div class="card-body">
                       <div class="card-meta">
                         <span class="sku-tag">{{ product.sku }}</span>
-                        <span class="badge badge-tipo">{{ product.tipo }}</span>
+                        <span class="badge badge-tipo">{{ product.productTypeNome || 'Sem Tipo' }}</span>
                       </div>
 
                       <h3 class="card-title">{{ product.nome }}</h3>
-                      <p class="material-text"><span class="badge badge-material">{{ product.material }}</span></p>
+                      <p class="material-text"><span class="badge badge-material">{{ product.materialColorNome || 'Sem Material' }}</span></p>
                       <p class="card-price">{{ product.preco | currency:'BRL':'symbol':'1.2-2' }}</p>
                     </div>
 
@@ -245,8 +267,11 @@ import { CategoryListComponent } from './components/category-list/category-list.
               </div>
             }
           } @else if (activeTab === 'categories') {
-            <!-- ABA DE GESTÃO DE CATEGORIAS E SUBCATEGORIAS -->
             <app-category-list></app-category-list>
+          } @else if (activeTab === 'product-types') {
+            <app-product-type-list></app-product-type-list>
+          } @else if (activeTab === 'material-colors') {
+            <app-material-color-list></app-material-color-list>
           }
         </div>
       </mat-sidenav-content>
@@ -320,7 +345,7 @@ export class AdminDashboardComponent implements OnInit, AfterViewInit {
   private snackBar = inject(MatSnackBar);
   private cdr = inject(ChangeDetectorRef);
 
-  activeTab: 'products' | 'categories' = 'products';
+  activeTab: 'products' | 'categories' | 'product-types' | 'material-colors' = 'products';
   viewMode: 'table' | 'grid' = 'table';
   imageErrors: Record<string, boolean> = {};
 

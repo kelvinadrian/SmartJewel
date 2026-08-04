@@ -1,33 +1,16 @@
-export type ProductType =
-  | 'ANEL'
-  | 'PULSEIRA'
-  | 'COLAR'
-  | 'BRINCO'
-  | 'CONJUNTO'
-  | 'TORNOZELEIRA'
-  | 'PIERCING'
-  | 'OUTROS';
-
-export type ProductMaterial =
-  | 'PRATA'
-  | 'DOURADO'
-  | 'BANHADO_A_OURO'
-  | 'BANHADO_A_PRATA'
-  | 'OURO_18K'
-  | 'RHODIUM'
-  | 'RHODIUM_NEGRO';
-
 export interface Product {
   id: string;
   nome: string;
   sku: string;
-  tipo: ProductType;
-  material: ProductMaterial;
-  subcategoryId?: string;
-  subcategoryNome?: string;
+  productTypeId?: string;
+  productTypeNome?: string;
   categoryId?: string;
   categoryNome?: string;
+  materialColorId?: string;
+  materialColorNome?: string;
   quantidadeEstoque: number;
+  availableQuantity?: number;
+  reservedQuantity?: number;
   imageUrl?: string;
   preco: number;
   createdAt?: string;
@@ -39,9 +22,9 @@ export interface Product {
 export interface CreateProductRequest {
   nome: string;
   sku: string;
-  tipo: ProductType;
-  material: ProductMaterial;
-  subcategoryId?: string;
+  productTypeId: string;
+  categoryId: string;
+  materialColorId: string;
   quantidadeEstoque: number;
   preco: number;
   imageUrl?: string;
@@ -49,9 +32,9 @@ export interface CreateProductRequest {
 
 export interface UpdateProductRequest {
   nome: string;
-  tipo: ProductType;
-  material: ProductMaterial;
-  subcategoryId?: string;
+  productTypeId: string;
+  categoryId: string;
+  materialColorId: string;
   preco: number;
   imageUrl?: string;
 }

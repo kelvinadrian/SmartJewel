@@ -4,18 +4,17 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { Category, ProductType, ProductTypeService } from '@shared-core';
+import { MaterialColor } from '@shared-core';
 
-export interface CategoryDialogData {
+export interface MaterialColorDialogData {
   mode: 'create' | 'edit';
-  category?: Category;
+  materialColor?: MaterialColor;
 }
 
 @Component({
-  selector: 'app-category-form-dialog',
+  selector: 'app-material-color-form-dialog',
   standalone: true,
   imports: [
     CommonModule,
@@ -23,30 +22,20 @@ export interface CategoryDialogData {
     MatDialogModule,
     MatFormFieldModule,
     MatInputModule,
-    MatSelectModule,
     MatButtonModule,
     MatIconModule
   ],
   template: `
     <h2 mat-dialog-title class="dialog-title">
       <mat-icon color="primary">{{ data.mode === 'create' ? 'add_circle' : 'edit' }}</mat-icon>
-      <span>{{ data.mode === 'create' ? 'Nova Categoria' : 'Editar Categoria' }}</span>
+      <span>{{ data.mode === 'create' ? 'Novo Material / Cor' : 'Editar Material / Cor' }}</span>
     </h2>
 
     <mat-dialog-content class="dialog-content">
       <form [formGroup]="form">
         <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Tipo de Produto (Pai)</mat-label>
-          <mat-select formControlName="productTypeId">
-            @for (pt of productTypes; track pt.id) {
-              <mat-option [value]="pt.id">{{ pt.nome }}</mat-option>
-            }
-          </mat-select>
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Nome da Categoria</mat-label>
-          <input matInput formControlName="nome" placeholder="Ex: Aliança de Compromisso, Anel Solitário..." />
+          <mat-label>Nome do Material / Cor</mat-label>
+          <input matInput formControlName="nome" placeholder="Ex: Prata 925, Banhado a Ouro..." />
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="full-width">
@@ -70,25 +59,18 @@ export interface CategoryDialogData {
     .full-width { width: 100%; }
   `]
 })
-export class CategoryFormDialogComponent implements OnInit {
-  dialogRef = inject(MatDialogRef<CategoryFormDialogComponent>);
-  data: CategoryDialogData = inject(MAT_DIALOG_DATA);
+export class MaterialColorFormDialogComponent implements OnInit {
+  dialogRef = inject(MatDialogRef<MaterialColorFormDialogComponent>);
+  data: MaterialColorDialogData = inject(MAT_DIALOG_DATA);
   private fb = inject(FormBuilder);
-  private productTypeService = inject(ProductTypeService);
 
   form!: FormGroup;
-  productTypes: ProductType[] = [];
 
   ngOnInit(): void {
-    const cat = this.data.category;
+    const mc = this.data.materialColor;
     this.form = this.fb.group({
-      productTypeId: [cat?.productTypeId || '', [Validators.required]],
-      nome: [cat?.nome || '', [Validators.required]],
-      descricao: [cat?.descricao || '']
-    });
-
-    this.productTypeService.getProductTypes().subscribe({
-      next: (types) => (this.productTypes = types)
+      nome: [mc?.nome || '', [Validators.required]],
+      descricao: [mc?.descricao || '']
     });
   }
 

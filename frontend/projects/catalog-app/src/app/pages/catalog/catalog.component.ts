@@ -18,11 +18,8 @@ import {
   CategoryService,
   CartService,
   Product,
-  ProductMaterial,
-  ProductType,
   Page,
   Category,
-  Subcategory,
   CartResponse
 } from '@shared-core';
 
@@ -150,7 +147,7 @@ import {
                 <button
                   mat-button
                   class="nav-category-btn"
-                  [class.active-btn]="!selectedCategoryId && !selectedSubcategoryId"
+                  [class.active-btn]="!selectedCategoryId"
                   (click)="resetCategoryFilters()"
                 >
                   <mat-icon class="nav-icon">auto_awesome</mat-icon>
@@ -160,32 +157,13 @@ import {
                 @for (cat of categories; track cat.id) {
                   <button
                     mat-button
-                    [matMenuTriggerFor]="subMenu"
                     class="nav-category-btn"
                     [class.active-btn]="selectedCategoryId === cat.id"
+                    (click)="selectCategory(cat)"
                   >
                     <mat-icon class="nav-icon">{{ getCategoryIcon(cat.nome) }}</mat-icon>
                     <span>{{ cat.nome }}</span>
-                    <mat-icon class="chevron-icon">chevron_right</mat-icon>
                   </button>
-
-                  <mat-menu #subMenu="matMenu" class="luxury-sub-menu" xPosition="after">
-                    <button mat-menu-item (click)="selectCategory(cat)">
-                      <mat-icon class="gold-icon">view_list</mat-icon>
-                      <span>Ver todos de {{ cat.nome }}</span>
-                    </button>
-                    <mat-divider></mat-divider>
-                    @for (sub of cat.subcategories; track sub.id) {
-                      <button
-                        mat-menu-item
-                        (click)="selectSubcategory(cat, sub)"
-                        [class.selected-sub]="selectedSubcategoryId === sub.id"
-                      >
-                        <mat-icon>diamond</mat-icon>
-                        <span>{{ sub.nome }}</span>
-                      </button>
-                    }
-                  </mat-menu>
                 }
               </div>
             </aside>
@@ -193,26 +171,16 @@ import {
             <!-- ÁREA PRINCIPAL DO CATÁLOGO DE PRODUTOS -->
             <main class="main-catalog-content">
               <!-- BARRA DE FILTROS SECUNDÁRIOS -->
-              <section class="filters-section glass-card">
-                @if (activeFilterLabel) {
+              @if (activeFilterLabel) {
+                <section class="filters-section glass-card">
                   <div class="active-filter-banner">
                     <span class="active-label">Filtro Ativo: <strong>{{ activeFilterLabel }}</strong></span>
                     <button mat-icon-button (click)="resetFilters()" matTooltip="Remover Filtro">
                       <mat-icon>close</mat-icon>
                     </button>
                   </div>
-                }
-
-                <div class="filter-group">
-                  <span class="filter-label"><mat-icon class="gold-icon">style</mat-icon> Material / Cor:</span>
-                  <mat-chip-listbox aria-label="Filtro Material">
-                    <mat-chip-option [selected]="selectedMaterial === null" (selectionChange)="onMaterialChange(null, $event)" class="custom-chip">Todos</mat-chip-option>
-                    @for (mat of materialOptions; track mat.value) {
-                      <mat-chip-option [selected]="selectedMaterial === mat.value" (selectionChange)="onMaterialChange(mat.value, $event)" class="custom-chip">{{ mat.label }}</mat-chip-option>
-                    }
-                  </mat-chip-listbox>
-                </div>
-              </section>
+                </section>
+              }
 
               <!-- GRID DE PEÇAS DE SEMIJOIAS -->
               <section class="products-section">
@@ -238,12 +206,15 @@ import {
 
                         <mat-card-content class="card-body">
                           <div class="badges-row">
-                            @if (product.subcategoryNome) {
-                              <span class="badge badge-sub">{{ product.subcategoryNome }}</span>
-                            } @else {
-                              <span class="badge badge-tipo">{{ product.tipo }}</span>
+                            @if (product.categoryNome) {
+                              <span class="badge badge-sub">{{ product.categoryNome }}</span>
                             }
-                            <span class="badge badge-material">{{ product.material }}</span>
+                            @if (product.productTypeNome) {
+                              <span class="badge badge-tipo">{{ product.productTypeNome }}</span>
+                            }
+                            @if (product.materialColorNome) {
+                              <span class="badge badge-material">{{ product.materialColorNome }}</span>
+                            }
                           </div>
                           <h3 class="product-title">{{ product.nome }}</h3>
                           <span class="product-sku">SKU: {{ product.sku }}</span>
@@ -399,23 +370,12 @@ export class CatalogComponent implements OnInit {
   imageErrors: Record<string, boolean> = {};
 
   selectedCategoryId: string | null = null;
-  selectedSubcategoryId: string | null = null;
-  selectedTipo: ProductType | null = null;
-  selectedMaterial: ProductMaterial | null = null;
+  selectedProductTypeId: string | null = null;
+  selectedMaterialColorId: string | null = null;
   activeFilterLabel: string | null = null;
 
   pageIndex = 0;
   pageSize = 12;
-
-  materialOptions: { label: string; value: ProductMaterial }[] = [
-    { label: 'Banhado a Ouro', value: 'BANHADO_A_OURO' },
-    { label: 'Prata 925', value: 'PRATA' },
-    { label: 'Dourado', value: 'DOURADO' },
-    { label: 'Banhado a Prata', value: 'BANHADO_A_PRATA' },
-    { label: 'Ouro 18k', value: 'OURO_18K' },
-    { label: 'Rhodium', value: 'RHODIUM' },
-    { label: 'Rhodium Negro', value: 'RHODIUM_NEGRO' }
-  ];
 
   ngOnInit(): void {
     this.loadCategories();
@@ -423,7 +383,7 @@ export class CatalogComponent implements OnInit {
 
     this.route.queryParams.subscribe(params => {
       this.selectedCategoryId = params['categoryId'] || null;
-      this.selectedSubcategoryId = params['subcategoryId'] || null;
+      this.selectedProductTypeId = params['productTypeId'] || null;
       this.updateActiveFilterLabel();
       this.loadCatalog();
     });
@@ -481,10 +441,9 @@ export class CatalogComponent implements OnInit {
   loadCatalog(): void {
     this.isLoading = true;
     this.catalogService.getCatalog(
-      this.selectedTipo,
-      this.selectedMaterial,
+      this.selectedProductTypeId,
       this.selectedCategoryId,
-      this.selectedSubcategoryId,
+      this.selectedMaterialColorId,
       this.pageIndex,
       this.pageSize
     ).subscribe({
@@ -514,42 +473,17 @@ export class CatalogComponent implements OnInit {
   selectCategory(cat: Category): void {
     this.router.navigate([], {
       relativeTo: this.route,
-      queryParams: { categoryId: cat.id, subcategoryId: null },
-      queryParamsHandling: 'merge'
-    });
-  }
-
-  selectSubcategory(cat: Category, sub: Subcategory): void {
-    this.router.navigate([], {
-      relativeTo: this.route,
-      queryParams: { categoryId: cat.id, subcategoryId: sub.id },
+      queryParams: { categoryId: cat.id },
       queryParamsHandling: 'merge'
     });
   }
 
   updateActiveFilterLabel(): void {
-    if (this.selectedSubcategoryId) {
-      for (const cat of this.categories) {
-        const sub = cat.subcategories.find(s => s.id === this.selectedSubcategoryId);
-        if (sub) {
-          this.activeFilterLabel = `${cat.nome} > ${sub.nome}`;
-          return;
-        }
-      }
-      this.activeFilterLabel = 'Subcategoria Selecionada';
-    } else if (this.selectedCategoryId) {
+    if (this.selectedCategoryId) {
       const cat = this.categories.find(c => c.id === this.selectedCategoryId);
       this.activeFilterLabel = cat ? cat.nome : 'Categoria Selecionada';
     } else {
       this.activeFilterLabel = null;
-    }
-  }
-
-  onMaterialChange(material: ProductMaterial | null, event: MatChipSelectionChange): void {
-    if (event.isUserInput) {
-      this.selectedMaterial = event.selected ? material : null;
-      this.pageIndex = 0;
-      this.loadCatalog();
     }
   }
 
@@ -562,14 +496,14 @@ export class CatalogComponent implements OnInit {
   resetCategoryFilters(): void {
     this.router.navigate([], {
       relativeTo: this.route,
-      queryParams: { categoryId: null, subcategoryId: null },
+      queryParams: { categoryId: null, productTypeId: null },
       queryParamsHandling: 'merge'
     });
   }
 
   resetFilters(): void {
-    this.selectedTipo = null;
-    this.selectedMaterial = null;
+    this.selectedProductTypeId = null;
+    this.selectedMaterialColorId = null;
     this.pageIndex = 0;
     this.resetCategoryFilters();
   }

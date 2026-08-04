@@ -7,7 +7,15 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { CategoryService, Category, Subcategory, Product, ProductMaterial, ProductType } from '@shared-core';
+import {
+  CategoryService,
+  ProductTypeService,
+  MaterialColorService,
+  Category,
+  ProductType,
+  MaterialColor,
+  Product
+} from '@shared-core';
 
 export interface ProductDialogData {
   mode: 'create' | 'edit';
@@ -45,50 +53,37 @@ export interface ProductDialogData {
           <input matInput formControlName="sku" placeholder="Ex: ANEL-001" />
         </mat-form-field>
 
-        <!-- DROPDOWNS CASCATEADOS DE CATEGORIA E SUBCATEGORIA -->
+        <!-- SELEÇÃO DE TIPO, CATEGORIA E MATERIAL -->
         <div class="form-row">
           <mat-form-field appearance="outline" class="half-width">
-            <mat-label>Categoria Principal</mat-label>
-            <mat-select formControlName="categoryId" (selectionChange)="onCategoryChange($event.value)">
-              <mat-option [value]="null">Nenhuma</mat-option>
+            <mat-label>Tipo de Produto</mat-label>
+            <mat-select formControlName="productTypeId" (selectionChange)="onProductTypeChange($event.value)">
+              @for (pt of productTypes; track pt.id) {
+                <mat-option [value]="pt.id">{{ pt.nome }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="half-width">
+            <mat-label>Categoria</mat-label>
+            <mat-select formControlName="categoryId">
               @for (cat of categories; track cat.id) {
                 <mat-option [value]="cat.id">{{ cat.nome }}</mat-option>
               }
             </mat-select>
           </mat-form-field>
-
-          <mat-form-field appearance="outline" class="half-width">
-            <mat-label>Subcategoria</mat-label>
-            <mat-select formControlName="subcategoryId">
-              <mat-option [value]="null">Nenhuma</mat-option>
-              @for (sub of availableSubcategories; track sub.id) {
-                <mat-option [value]="sub.id">{{ sub.nome }}</mat-option>
-              }
-            </mat-select>
-          </mat-form-field>
         </div>
 
         <div class="form-row">
-          <mat-form-field appearance="outline" class="half-width">
-            <mat-label>Tipo</mat-label>
-            <mat-select formControlName="tipo">
-              @for (tipo of productTypes; track tipo.value) {
-                <mat-option [value]="tipo.value">{{ tipo.label }}</mat-option>
-              }
-            </mat-select>
-          </mat-form-field>
-
           <mat-form-field appearance="outline" class="half-width">
             <mat-label>Material / Cor</mat-label>
-            <mat-select formControlName="material">
-              @for (mat of productMaterials; track mat.value) {
-                <mat-option [value]="mat.value">{{ mat.label }}</mat-option>
+            <mat-select formControlName="materialColorId">
+              @for (mc of materialColors; track mc.id) {
+                <mat-option [value]="mc.id">{{ mc.nome }}</mat-option>
               }
             </mat-select>
           </mat-form-field>
-        </div>
 
-        <div class="form-row">
           <mat-form-field appearance="outline" class="half-width">
             <mat-label>Preço</mat-label>
             <input
@@ -99,7 +94,9 @@ export interface ProductDialogData {
               placeholder="R$ 0,00"
             />
           </mat-form-field>
+        </div>
 
+        <div class="form-row">
           @if (data.mode === 'create') {
             <mat-form-field appearance="outline" class="half-width">
               <mat-label>Estoque Inicial</mat-label>
@@ -154,36 +151,18 @@ export class ProductFormDialogComponent implements OnInit {
   dialogRef = inject(MatDialogRef<ProductFormDialogComponent>);
   data: ProductDialogData = inject(MAT_DIALOG_DATA);
   private fb = inject(FormBuilder);
+  private productTypeService = inject(ProductTypeService);
   private categoryService = inject(CategoryService);
+  private materialColorService = inject(MaterialColorService);
 
   productForm!: FormGroup;
   selectedFile: File | null = null;
   imagePreview: string | null = null;
   formattedPrice: string = 'R$ 0,00';
 
+  productTypes: ProductType[] = [];
   categories: Category[] = [];
-  availableSubcategories: Subcategory[] = [];
-
-  productTypes: { label: string; value: ProductType }[] = [
-    { label: 'Anel', value: 'ANEL' },
-    { label: 'Pulseira', value: 'PULSEIRA' },
-    { label: 'Colar', value: 'COLAR' },
-    { label: 'Brinco', value: 'BRINCO' },
-    { label: 'Conjunto', value: 'CONJUNTO' },
-    { label: 'Tornozeleira', value: 'TORNOZELEIRA' },
-    { label: 'Piercing', value: 'PIERCING' },
-    { label: 'Outros', value: 'OUTROS' }
-  ];
-
-  productMaterials: { label: string; value: ProductMaterial }[] = [
-    { label: 'Banhado a Ouro', value: 'BANHADO_A_OURO' },
-    { label: 'Prata 925', value: 'PRATA' },
-    { label: 'Dourado', value: 'DOURADO' },
-    { label: 'Banhado a Prata', value: 'BANHADO_A_PRATA' },
-    { label: 'Ouro 18k', value: 'OURO_18K' },
-    { label: 'Rhodium', value: 'RHODIUM' },
-    { label: 'Rhodium Negro', value: 'RHODIUM_NEGRO' }
-  ];
+  materialColors: MaterialColor[] = [];
 
   ngOnInit(): void {
     const p = this.data.product;
@@ -192,10 +171,9 @@ export class ProductFormDialogComponent implements OnInit {
     this.productForm = this.fb.group({
       nome: [p?.nome || '', [Validators.required]],
       sku: [{ value: p?.sku || '', disabled: this.data.mode === 'edit' }, [Validators.required]],
-      categoryId: [p?.categoryId || null],
-      subcategoryId: [p?.subcategoryId || null],
-      tipo: [p?.tipo || 'ANEL', [Validators.required]],
-      material: [p?.material || 'BANHADO_A_OURO', [Validators.required]],
+      productTypeId: [p?.productTypeId || null, [Validators.required]],
+      categoryId: [p?.categoryId || null, [Validators.required]],
+      materialColorId: [p?.materialColorId || null, [Validators.required]],
       preco: [initialPrice, [Validators.required, Validators.min(0.01)]],
       quantidadeEstoque: [p?.quantidadeEstoque || 0, [Validators.min(0)]],
       imageUrl: [p?.imageUrl || null]
@@ -207,47 +185,42 @@ export class ProductFormDialogComponent implements OnInit {
       this.imagePreview = p.imageUrl;
     }
 
-    this.loadCategories(p?.categoryId, p?.subcategoryId);
+    this.loadDropdownData(p?.productTypeId, p?.categoryId);
   }
 
-  loadCategories(initialCategoryId?: string, initialSubcategoryId?: string): void {
-    this.categoryService.getCategories().subscribe({
-      next: (cats) => {
-        this.categories = cats;
-
-        if (initialSubcategoryId && !initialCategoryId) {
-          for (const cat of cats) {
-            if (cat.subcategories && cat.subcategories.some(s => s.id === initialSubcategoryId)) {
-              initialCategoryId = cat.id;
-              break;
-            }
-          }
+  loadDropdownData(initialProductTypeId?: string, initialCategoryId?: string): void {
+    this.productTypeService.getProductTypes().subscribe({
+      next: (types) => {
+        this.productTypes = types;
+        if (initialProductTypeId) {
+          this.loadCategories(initialProductTypeId, initialCategoryId);
         }
+      }
+    });
 
-        if (initialCategoryId) {
-          this.productForm.get('categoryId')?.setValue(initialCategoryId);
-          this.onCategoryChange(initialCategoryId, false);
-          if (initialSubcategoryId) {
-            this.productForm.get('subcategoryId')?.setValue(initialSubcategoryId);
-          }
-        }
-      },
-      error: () => {}
+    this.materialColorService.getMaterialColors().subscribe({
+      next: (mats) => (this.materialColors = mats)
     });
   }
 
-  onCategoryChange(categoryId: string | null, resetSubcategory: boolean = true): void {
-    if (resetSubcategory) {
-      this.productForm.get('subcategoryId')?.setValue(null);
+  onProductTypeChange(productTypeId: string | null): void {
+    this.productForm.get('categoryId')?.setValue(null);
+    if (productTypeId) {
+      this.loadCategories(productTypeId);
+    } else {
+      this.categories = [];
     }
+  }
 
-    if (!categoryId) {
-      this.availableSubcategories = [];
-      return;
-    }
-
-    const selectedCategory = this.categories.find(c => c.id === categoryId);
-    this.availableSubcategories = selectedCategory ? selectedCategory.subcategories || [] : [];
+  loadCategories(productTypeId: string, selectCategoryId?: string): void {
+    this.categoryService.getCategories(productTypeId).subscribe({
+      next: (cats) => {
+        this.categories = cats;
+        if (selectCategoryId) {
+          this.productForm.get('categoryId')?.setValue(selectCategoryId);
+        }
+      }
+    });
   }
 
   onPriceInput(event: Event): void {

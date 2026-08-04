@@ -1,14 +1,13 @@
-export interface Subcategory {
-  id: string;
-  nome: string;
-  descricao?: string;
-  categoryId?: string;
-  categoryNome?: string;
-}
-
 export interface Category {
   id: string;
   nome: string;
   descricao?: string;
-  subcategories: Subcategory[];
+  productTypeId?: string;
+  productTypeNome?: string;
+}
+
+export interface CreateCategoryRequest {
+  nome: string;
+  descricao?: string;
+  productTypeId: string;
 }
