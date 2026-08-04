@@ -22,6 +22,7 @@ import { InventoryImportDialogComponent } from './components/inventory-import-di
 import { CategoryListComponent } from './components/category-list/category-list.component';
 import { ProductTypeListComponent } from './components/product-type-list/product-type-list.component';
 import { MaterialColorListComponent } from './components/material-color-list/material-color-list.component';
+import { ProductListComponent } from './components/product-list/product-list.component';
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -44,7 +45,8 @@ import { MaterialColorListComponent } from './components/material-color-list/mat
     MatButtonToggleModule,
     CategoryListComponent,
     ProductTypeListComponent,
-    MaterialColorListComponent
+    MaterialColorListComponent,
+    ProductListComponent
   ],
   template: `
     <!-- BARRA SUPERIOR (TOPBAR / TOOLBAR) -->
@@ -267,176 +269,7 @@ import { MaterialColorListComponent } from './components/material-color-list/mat
 
           <!-- VISÃO 2: GERENCIAR PRODUTOS -->
           @if (activeTab === 'products') {
-            <header class="page-header">
-              <div>
-                <h2>Gerenciamento de Produtos</h2>
-                <p>Consulte, filtre e atualize peças, fotos e estoque do catálogo</p>
-              </div>
-
-              <div class="header-actions">
-                <button mat-stroked-button class="btn-secondary-action" (click)="openImportDialog()">
-                  <mat-icon>file_upload</mat-icon>
-                  <span>Importar Estoque</span>
-                </button>
-
-                <button mat-raised-button color="primary" class="btn-primary-action" (click)="openCreateDialog()">
-                  <mat-icon>add</mat-icon>
-                  <span>Novo Produto</span>
-                </button>
-              </div>
-            </header>
-
-            <div class="toolbar-section corporate-card">
-              <mat-form-field appearance="outline" class="search-field">
-                <mat-label>Buscar por Nome, SKU, Tipo ou Material...</mat-label>
-                <input matInput (keyup)="applyFilter($event)" placeholder="Ex: Anel Solitário, SKU-001..." #input />
-                <mat-icon matPrefix color="primary">search</mat-icon>
-              </mat-form-field>
-
-              <mat-button-toggle-group [value]="viewMode" (change)="viewMode = $event.value" class="view-toggle">
-                <mat-button-toggle value="table" matTooltip="Modo Tabela">
-                  <mat-icon>view_list</mat-icon>
-                </mat-button-toggle>
-                <mat-button-toggle value="grid" matTooltip="Modo Cards">
-                  <mat-icon>grid_view</mat-icon>
-                </mat-button-toggle>
-              </mat-button-toggle-group>
-            </div>
-
-            @if (viewMode === 'table') {
-              <div class="table-container corporate-card">
-                <table mat-table [dataSource]="dataSource" matSort class="full-width-table">
-                  <ng-container matColumnDef="imageUrl">
-                    <th mat-header-cell *matHeaderCellDef>Foto</th>
-                    <td mat-cell *matCellDef="let element">
-                      @if (element.imageUrl && !imageErrors[element.id]) {
-                        <img [src]="element.imageUrl" (error)="onImageError(element.id)" alt="Foto" class="product-thumb" />
-                      } @else {
-                        <div class="thumb-placeholder" matTooltip="Sem Imagem"><mat-icon>diamond</mat-icon></div>
-                      }
-                    </td>
-                  </ng-container>
-
-                  <ng-container matColumnDef="sku">
-                    <th mat-header-cell *matHeaderCellDef mat-sort-header>SKU</th>
-                    <td mat-cell *matCellDef="let element" class="sku-cell">{{ element.sku }}</td>
-                  </ng-container>
-
-                  <ng-container matColumnDef="nome">
-                    <th mat-header-cell *matHeaderCellDef mat-sort-header>Nome</th>
-                    <td mat-cell *matCellDef="let element" class="name-cell">
-                      <strong>{{ element.nome }}</strong>
-                    </td>
-                  </ng-container>
-
-                  <ng-container matColumnDef="tipo">
-                    <th mat-header-cell *matHeaderCellDef mat-sort-header>Tipo</th>
-                    <td mat-cell *matCellDef="let element">
-                      <span class="badge badge-type">{{ element.productTypeNome || 'Sem Tipo' }}</span>
-                    </td>
-                  </ng-container>
-
-                  <ng-container matColumnDef="material">
-                    <th mat-header-cell *matHeaderCellDef mat-sort-header>Material</th>
-                    <td mat-cell *matCellDef="let element">
-                      <span class="badge badge-material">{{ element.materialColorNome || 'Sem Material' }}</span>
-                    </td>
-                  </ng-container>
-
-                  <ng-container matColumnDef="preco">
-                    <th mat-header-cell *matHeaderCellDef mat-sort-header>Preço</th>
-                    <td mat-cell *matCellDef="let element" class="price-cell">
-                      {{ element.preco | currency:'BRL':'symbol':'1.2-2' }}
-                    </td>
-                  </ng-container>
-
-                  <ng-container matColumnDef="quantidadeEstoque">
-                    <th mat-header-cell *matHeaderCellDef mat-sort-header>Estoque</th>
-                    <td mat-cell *matCellDef="let element">
-                      <span [class]="element.quantidadeEstoque > 0 ? 'stock-ok' : 'stock-zero'">
-                        {{ element.quantidadeEstoque }} un
-                      </span>
-                    </td>
-                  </ng-container>
-
-                  <ng-container matColumnDef="actions">
-                    <th mat-header-cell *matHeaderCellDef>Ações</th>
-                    <td mat-cell *matCellDef="let element" class="actions-cell">
-                      <button mat-icon-button color="accent" matTooltip="Movimentar Estoque" (click)="openStockDialog(element)">
-                        <mat-icon>inventory_2</mat-icon>
-                      </button>
-                      <button mat-icon-button color="primary" matTooltip="Editar Produto" (click)="openEditDialog(element)">
-                        <mat-icon>edit</mat-icon>
-                      </button>
-                      <button mat-icon-button color="warn" matTooltip="Excluir Produto" (click)="deleteProduct(element)">
-                        <mat-icon>delete</mat-icon>
-                      </button>
-                    </td>
-                  </ng-container>
-
-                  <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-                  <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-                  <tr class="mat-row" *matNoDataRow>
-                    <td class="mat-cell no-data-cell" colspan="8">
-                      Nenhum produto encontrado no inventário.
-                    </td>
-                  </tr>
-                </table>
-                <mat-paginator [pageSizeOptions]="[10, 25, 50]" showFirstLastButtons></mat-paginator>
-              </div>
-            }
-
-            @if (viewMode === 'grid') {
-              <div class="cards-grid">
-                @for (product of filteredProducts; track product.id) {
-                  <div class="product-card corporate-card">
-                    <div class="card-image-container">
-                      @if (product.imageUrl && !imageErrors[product.id]) {
-                        <img [src]="product.imageUrl" (error)="onImageError(product.id)" alt="{{ product.nome }}" class="card-image" />
-                      } @else {
-                        <div class="card-image-placeholder">
-                          <mat-icon class="placeholder-icon">diamond</mat-icon>
-                          <span>Sem Foto</span>
-                        </div>
-                      }
-                      <span [class]="product.quantidadeEstoque > 0 ? 'stock-badge stock-ok-badge' : 'stock-badge stock-zero-badge'">
-                        Estoque: {{ product.quantidadeEstoque }} un
-                      </span>
-                    </div>
-
-                    <div class="card-body">
-                      <div class="card-meta">
-                        <span class="sku-tag">{{ product.sku }}</span>
-                        <span class="badge badge-type">{{ product.productTypeNome || 'Sem Tipo' }}</span>
-                      </div>
-
-                      <h3 class="card-title">{{ product.nome }}</h3>
-                      <p class="material-text"><span class="badge badge-material">{{ product.materialColorNome || 'Sem Material' }}</span></p>
-                      <p class="card-price">{{ product.preco | currency:'BRL':'symbol':'1.2-2' }}</p>
-                    </div>
-
-                    <div class="card-actions">
-                      <button mat-stroked-button color="accent" class="action-btn" matTooltip="Estoque" (click)="openStockDialog(product)">
-                        <mat-icon>inventory_2</mat-icon>
-                        <span>Estoque</span>
-                      </button>
-                      <button mat-stroked-button color="primary" class="action-btn" matTooltip="Editar" (click)="openEditDialog(product)">
-                        <mat-icon>edit</mat-icon>
-                        <span>Editar</span>
-                      </button>
-                      <button mat-icon-button color="warn" matTooltip="Excluir" (click)="deleteProduct(product)">
-                        <mat-icon>delete</mat-icon>
-                      </button>
-                    </div>
-                  </div>
-                } @empty {
-                  <div class="no-data-card corporate-card">
-                    <mat-icon color="primary">info</mat-icon>
-                    <p>Nenhum produto cadastrado ou encontrado com este filtro.</p>
-                  </div>
-                }
-              </div>
-            }
+            <app-product-list></app-product-list>
           }
 
           <!-- VISÃO 3: TIPOS DE PRODUTOS -->
