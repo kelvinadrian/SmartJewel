@@ -45,8 +45,10 @@ import { SubcategoryFormDialogComponent } from '../subcategory-form-dialog/subca
           <ng-container matColumnDef="nome">
             <th mat-header-cell *matHeaderCellDef>Nome da Subcategoria</th>
             <td mat-cell *matCellDef="let element" class="name-cell">
-              <mat-icon class="sub-icon">diamond</mat-icon>
-              <span>{{ element.nome }}</span>
+              <div class="cell-content">
+                <mat-icon class="sub-icon">diamond</mat-icon>
+                <span>{{ element.nome }}</span>
+              </div>
             </td>
           </ng-container>
 
@@ -60,12 +62,14 @@ import { SubcategoryFormDialogComponent } from '../subcategory-form-dialog/subca
           <ng-container matColumnDef="actions">
             <th mat-header-cell *matHeaderCellDef>Ações</th>
             <td mat-cell *matCellDef="let element" class="actions-cell">
-              <button mat-icon-button color="primary" matTooltip="Editar Subcategoria" (click)="openEditSubcategoryDialog(element)">
-                <mat-icon>edit</mat-icon>
-              </button>
-              <button mat-icon-button color="warn" matTooltip="Excluir Subcategoria" (click)="deleteSubcategory(element)">
-                <mat-icon>delete</mat-icon>
-              </button>
+              <div class="actions-wrapper">
+                <button mat-icon-button color="primary" matTooltip="Editar Subcategoria" (click)="openEditSubcategoryDialog(element)">
+                  <mat-icon>edit</mat-icon>
+                </button>
+                <button mat-icon-button color="warn" matTooltip="Excluir Subcategoria" (click)="deleteSubcategory(element)">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </div>
             </td>
           </ng-container>
 
@@ -90,10 +94,13 @@ import { SubcategoryFormDialogComponent } from '../subcategory-form-dialog/subca
     .add-btn { background: linear-gradient(135deg, #D4AF37 0%, #b28b29 100%) !important; color: #1A1C1E !important; font-weight: 700; height: 42px; border-radius: 8px; }
 
     .table-container { padding: 1rem; border-radius: 12px; background: #2A2D30; border: 1px solid rgba(212, 175, 55, 0.2); }
-    .full-width-table { width: 100%; background: transparent !important; }
-    .name-cell { display: flex; align-items: center; gap: 0.6rem; font-weight: 600; color: #E2E2E6; }
+    .full-width-table { width: 100%; background: transparent !important; border-collapse: collapse; }
+    .name-cell { font-weight: 600; color: #E2E2E6; vertical-align: middle; }
+    .cell-content { display: inline-flex; align-items: center; gap: 0.6rem; }
     .sub-icon { color: #D4AF37; font-size: 1.1rem; width: 1.1rem; height: 1.1rem; }
-    .desc-cell { color: #94a3b8; font-size: 0.9rem; }
+    .desc-cell { color: #94a3b8; font-size: 0.9rem; vertical-align: middle; }
+    .actions-cell { vertical-align: middle; white-space: nowrap; }
+    .actions-wrapper { display: inline-flex; align-items: center; gap: 0.4rem; }
     .no-data-cell { text-align: center; padding: 2rem; color: #94a3b8; }
   `]
 })

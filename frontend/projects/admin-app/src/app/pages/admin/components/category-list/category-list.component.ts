@@ -43,8 +43,10 @@ import { SubcategoryListComponent } from '../subcategory-list/subcategory-list.c
             <ng-container matColumnDef="nome">
               <th mat-header-cell *matHeaderCellDef>Categoria</th>
               <td mat-cell *matCellDef="let element" class="name-cell">
-                <mat-icon class="cat-icon">category</mat-icon>
-                <strong>{{ element.nome }}</strong>
+                <div class="cell-content">
+                  <mat-icon class="cat-icon">category</mat-icon>
+                  <strong>{{ element.nome }}</strong>
+                </div>
               </td>
             </ng-container>
 
@@ -67,24 +69,26 @@ import { SubcategoryListComponent } from '../subcategory-list/subcategory-list.c
             <ng-container matColumnDef="actions">
               <th mat-header-cell *matHeaderCellDef>Ações</th>
               <td mat-cell *matCellDef="let element" class="actions-cell">
-                <button
-                  mat-stroked-button
-                  color="accent"
-                  class="view-sub-btn"
-                  matTooltip="Gerenciar Subcategorias"
-                  (click)="viewSubcategories(element)"
-                >
-                  <mat-icon>style</mat-icon>
-                  <span>Ver Subcategorias</span>
-                </button>
+                <div class="actions-wrapper">
+                  <button
+                    mat-stroked-button
+                    color="accent"
+                    class="view-sub-btn"
+                    matTooltip="Gerenciar Subcategorias"
+                    (click)="viewSubcategories(element)"
+                  >
+                    <mat-icon>style</mat-icon>
+                    <span>Ver Subcategorias</span>
+                  </button>
 
-                <button mat-icon-button color="primary" matTooltip="Editar Categoria" (click)="openEditCategoryDialog(element)">
-                  <mat-icon>edit</mat-icon>
-                </button>
+                  <button mat-icon-button color="primary" matTooltip="Editar Categoria" (click)="openEditCategoryDialog(element)">
+                    <mat-icon>edit</mat-icon>
+                  </button>
 
-                <button mat-icon-button color="warn" matTooltip="Excluir Categoria" (click)="deleteCategory(element)">
-                  <mat-icon>delete</mat-icon>
-                </button>
+                  <button mat-icon-button color="warn" matTooltip="Excluir Categoria" (click)="deleteCategory(element)">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </div>
               </td>
             </ng-container>
 
@@ -114,12 +118,14 @@ import { SubcategoryListComponent } from '../subcategory-list/subcategory-list.c
     .add-btn { background: linear-gradient(135deg, #D4AF37 0%, #b28b29 100%) !important; color: #1A1C1E !important; font-weight: 700; height: 44px; border-radius: 10px; }
 
     .table-container { padding: 1rem; border-radius: 12px; background: #2A2D30; border: 1px solid rgba(212, 175, 55, 0.2); }
-    .full-width-table { width: 100%; background: transparent !important; }
-    .name-cell { display: flex; align-items: center; gap: 0.6rem; font-weight: 600; color: #E2E2E6; }
+    .full-width-table { width: 100%; background: transparent !important; border-collapse: collapse; }
+    .name-cell { font-weight: 600; color: #E2E2E6; vertical-align: middle; }
+    .cell-content { display: inline-flex; align-items: center; gap: 0.6rem; }
     .cat-icon { color: #D4AF37; }
-    .desc-cell { color: #94a3b8; font-size: 0.9rem; }
+    .desc-cell { color: #94a3b8; font-size: 0.9rem; vertical-align: middle; }
     .sub-badge { padding: 0.25rem 0.6rem; border-radius: 12px; background: rgba(212, 175, 55, 0.15); color: #D4AF37; font-size: 0.8rem; font-weight: 600; border: 1px solid rgba(212, 175, 55, 0.3); }
-    .actions-cell { display: flex; align-items: center; gap: 0.4rem; }
+    .actions-cell { vertical-align: middle; white-space: nowrap; }
+    .actions-wrapper { display: inline-flex; align-items: center; gap: 0.4rem; }
     .view-sub-btn { border-color: rgba(212, 175, 55, 0.4) !important; color: #D4AF37 !important; border-radius: 8px; }
     .no-data-cell { text-align: center; padding: 2rem; color: #94a3b8; }
   `]
