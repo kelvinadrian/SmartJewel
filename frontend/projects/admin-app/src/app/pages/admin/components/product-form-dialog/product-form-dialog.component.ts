@@ -53,11 +53,12 @@ export interface ProductDialogData {
           <input matInput formControlName="sku" placeholder="Ex: ANEL-001" />
         </mat-form-field>
 
-        <!-- SELEÇÃO DE TIPO, CATEGORIA E MATERIAL -->
+        <!-- SELEÇÃO DE TIPO, CATEGORIA (CASCATEADA) E MATERIAL -->
         <div class="form-row">
           <mat-form-field appearance="outline" class="half-width">
             <mat-label>Tipo de Produto</mat-label>
             <mat-select formControlName="productTypeId" (selectionChange)="onProductTypeChange($event.value)">
+              <mat-option [value]="null">Selecione o Tipo...</mat-option>
               @for (pt of productTypes; track pt.id) {
                 <mat-option [value]="pt.id">{{ pt.nome }}</mat-option>
               }
@@ -67,6 +68,9 @@ export interface ProductDialogData {
           <mat-form-field appearance="outline" class="half-width">
             <mat-label>Categoria</mat-label>
             <mat-select formControlName="categoryId">
+              <mat-option [value]="null">
+                {{ productForm.get('productTypeId')?.value ? 'Selecione a Categoria...' : 'Selecione o Tipo primeiro' }}
+              </mat-option>
               @for (cat of categories; track cat.id) {
                 <mat-option [value]="cat.id">{{ cat.nome }}</mat-option>
               }
@@ -78,6 +82,7 @@ export interface ProductDialogData {
           <mat-form-field appearance="outline" class="half-width">
             <mat-label>Material / Cor</mat-label>
             <mat-select formControlName="materialColorId">
+              <mat-option [value]="null">Selecione o Material...</mat-option>
               @for (mc of materialColors; track mc.id) {
                 <mat-option [value]="mc.id">{{ mc.nome }}</mat-option>
               }
@@ -172,7 +177,7 @@ export class ProductFormDialogComponent implements OnInit {
       nome: [p?.nome || '', [Validators.required]],
       sku: [{ value: p?.sku || '', disabled: this.data.mode === 'edit' }, [Validators.required]],
       productTypeId: [p?.productTypeId || null, [Validators.required]],
-      categoryId: [p?.categoryId || null, [Validators.required]],
+      categoryId: [{ value: p?.categoryId || null, disabled: !p?.productTypeId }, [Validators.required]],
       materialColorId: [p?.materialColorId || null, [Validators.required]],
       preco: [initialPrice, [Validators.required, Validators.min(0.01)]],
       quantidadeEstoque: [p?.quantidadeEstoque || 0, [Validators.min(0)]],
@@ -185,10 +190,10 @@ export class ProductFormDialogComponent implements OnInit {
       this.imagePreview = p.imageUrl;
     }
 
-    this.loadDropdownData(p?.productTypeId, p?.categoryId);
+    this.loadInitialData(p?.productTypeId, p?.categoryId);
   }
 
-  loadDropdownData(initialProductTypeId?: string, initialCategoryId?: string): void {
+  loadInitialData(initialProductTypeId?: string, initialCategoryId?: string): void {
     this.productTypeService.getProductTypes().subscribe({
       next: (types) => {
         this.productTypes = types;
@@ -204,21 +209,32 @@ export class ProductFormDialogComponent implements OnInit {
   }
 
   onProductTypeChange(productTypeId: string | null): void {
-    this.productForm.get('categoryId')?.setValue(null);
-    if (productTypeId) {
-      this.loadCategories(productTypeId);
-    } else {
+    const categoryControl = this.productForm.get('categoryId');
+    categoryControl?.setValue(null);
+
+    if (!productTypeId) {
       this.categories = [];
+      categoryControl?.disable();
+      return;
     }
+
+    categoryControl?.disable();
+    this.loadCategories(productTypeId);
   }
 
   loadCategories(productTypeId: string, selectCategoryId?: string): void {
+    const categoryControl = this.productForm.get('categoryId');
     this.categoryService.getCategories(productTypeId).subscribe({
       next: (cats) => {
         this.categories = cats;
+        categoryControl?.enable();
         if (selectCategoryId) {
-          this.productForm.get('categoryId')?.setValue(selectCategoryId);
+          categoryControl?.setValue(selectCategoryId);
         }
+      },
+      error: () => {
+        this.categories = [];
+        categoryControl?.disable();
       }
     });
   }
