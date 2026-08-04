@@ -9,7 +9,22 @@ import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatDividerModule } from '@angular/material/divider';
-import { CatalogService, CategoryService, Product, ProductMaterial, ProductType, Page, Category, Subcategory } from '@shared-core';
+import { MatSidenav, MatSidenavModule } from '@angular/material/sidenav';
+import { MatBadgeModule } from '@angular/material/badge';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import {
+  CatalogService,
+  CategoryService,
+  CartService,
+  Product,
+  ProductMaterial,
+  ProductType,
+  Page,
+  Category,
+  Subcategory,
+  CartResponse
+} from '@shared-core';
 
 @Component({
   selector: 'app-catalog',
@@ -23,169 +38,299 @@ import { CatalogService, CategoryService, Product, ProductMaterial, ProductType,
     MatPaginatorModule,
     MatProgressSpinnerModule,
     MatMenuModule,
-    MatDividerModule
+    MatDividerModule,
+    MatSidenavModule,
+    MatBadgeModule,
+    MatSnackBarModule,
+    MatTooltipModule
   ],
   template: `
-    <div class="catalog-page-container">
-      <header class="catalog-hero">
-        <div class="hero-content">
-          <h1 class="gold-text">Coleção Exclusiva SmartJewel</h1>
-          <p>Semijoias com design de alta joalheria, banho de ouro 18k, prata 925 e pedras selecionadas.</p>
+    <mat-sidenav-container class="catalog-sidenav-container" [hasBackdrop]="true">
+      <!-- GAVETA LATERAL DESLIZANTE DO CARRINHO (DESLIZE PELA DIREITA) -->
+      <mat-sidenav #cartSidenav position="end" mode="over" class="cart-sidenav">
+        <div class="cart-drawer-header">
+          <div class="cart-drawer-title">
+            <mat-icon class="gold-icon">shopping_bag</mat-icon>
+            <h2>Seu Carrinho de Luxo</h2>
+          </div>
+          <button mat-icon-button (click)="cartSidenav.close()" aria-label="Fechar Carrinho">
+            <mat-icon>close</mat-icon>
+          </button>
         </div>
-      </header>
 
-      <div class="catalog-layout">
-        <!-- BARRA DE NAVEGAÇÃO / MENU LATERAL ESQUERDO DE CATEGORIAS -->
-        <aside class="sidebar-category-nav glass-card">
-          <div class="sidebar-header">
-            <mat-icon class="gold-icon">menu_book</mat-icon>
-            <h2>Categorias</h2>
-          </div>
+        <div class="cart-drawer-body">
+          @if (currentCart && currentCart.items.length > 0) {
+            <div class="cart-items-list">
+              @for (item of currentCart.items; track item.itemId) {
+                <div class="cart-item-card">
+                  <div class="cart-item-thumb">
+                    @if (item.productImageUrl) {
+                      <img [src]="item.productImageUrl" alt="{{ item.productNome }}" />
+                    } @else {
+                      <div class="thumb-fallback"><mat-icon>diamond</mat-icon></div>
+                    }
+                  </div>
 
-          <div class="categories-list">
-            <button
-              mat-button
-              class="nav-category-btn"
-              [class.active-btn]="!selectedCategoryId && !selectedSubcategoryId"
-              (click)="resetCategoryFilters()"
-            >
-              <mat-icon class="nav-icon">auto_awesome</mat-icon>
-              <span>Todas as Joias</span>
-            </button>
-
-            @for (cat of categories; track cat.id) {
-              <button
-                mat-button
-                [matMenuTriggerFor]="subMenu"
-                class="nav-category-btn"
-                [class.active-btn]="selectedCategoryId === cat.id"
-              >
-                <mat-icon class="nav-icon">{{ getCategoryIcon(cat.nome) }}</mat-icon>
-                <span>{{ cat.nome }}</span>
-                <mat-icon class="chevron-icon">chevron_right</mat-icon>
-              </button>
-
-              <mat-menu #subMenu="matMenu" class="luxury-sub-menu" xPosition="after">
-                <button mat-menu-item (click)="selectCategory(cat)">
-                  <mat-icon class="gold-icon">view_list</mat-icon>
-                  <span>Ver todos de {{ cat.nome }}</span>
-                </button>
-                <mat-divider></mat-divider>
-                @for (sub of cat.subcategories; track sub.id) {
-                  <button
-                    mat-menu-item
-                    (click)="selectSubcategory(cat, sub)"
-                    [class.selected-sub]="selectedSubcategoryId === sub.id"
-                  >
-                    <mat-icon>diamond</mat-icon>
-                    <span>{{ sub.nome }}</span>
-                  </button>
-                }
-              </mat-menu>
-            }
-          </div>
-        </aside>
-
-        <!-- ÁREA PRINCIPAL DO CATÁLOGO DE PRODUTOS -->
-        <main class="main-catalog-content">
-          <!-- BARRA DE FILTROS SECUNDÁRIOS -->
-          <section class="filters-section glass-card">
-            @if (activeFilterLabel) {
-              <div class="active-filter-banner">
-                <span class="active-label">Filtro Ativo: <strong>{{ activeFilterLabel }}</strong></span>
-                <button mat-icon-button (click)="resetFilters()" matTooltip="Remover Filtro">
-                  <mat-icon>close</mat-icon>
-                </button>
-              </div>
-            }
-
-            <div class="filter-group">
-              <span class="filter-label"><mat-icon class="gold-icon">style</mat-icon> Material / Cor:</span>
-              <mat-chip-listbox aria-label="Filtro Material">
-                <mat-chip-option [selected]="selectedMaterial === null" (selectionChange)="onMaterialChange(null, $event)" class="custom-chip">Todos</mat-chip-option>
-                @for (mat of materialOptions; track mat.value) {
-                  <mat-chip-option [selected]="selectedMaterial === mat.value" (selectionChange)="onMaterialChange(mat.value, $event)" class="custom-chip">{{ mat.label }}</mat-chip-option>
-                }
-              </mat-chip-listbox>
-            </div>
-          </section>
-
-          <!-- GRID DE PEÇAS DE SEMIJOIAS -->
-          <section class="products-section">
-            @if (isLoading) {
-              <div class="loading-state">
-                <mat-spinner diameter="48" color="primary"></mat-spinner>
-                <p>Buscando peças...</p>
-              </div>
-            } @else if (productsPage && productsPage.content.length > 0) {
-              <div class="product-grid">
-                @for (product of productsPage.content; track product.id) {
-                  <mat-card class="product-card glass-card">
-                    <div class="card-image-wrapper">
-                      @if (product.imageUrl && !imageErrors[product.id]) {
-                        <img [src]="product.imageUrl" (error)="onImageError(product.id)" [alt]="product.nome" class="product-image" />
-                      } @else {
-                        <div class="product-image-fallback"><mat-icon>diamond</mat-icon></div>
-                      }
-                      <span class="status-chip" [class.in-stock]="product.quantidadeEstoque > 0" [class.out-stock]="product.quantidadeEstoque <= 0">
-                        {{ product.quantidadeEstoque > 0 ? 'Disponível' : 'Esgotado' }}
-                      </span>
+                  <div class="cart-item-info">
+                    <h4 class="item-name">{{ item.productNome }}</h4>
+                    <span class="item-sku">SKU: {{ item.productSku }}</span>
+                    <div class="item-qty-price">
+                      <span class="item-qty">Qtd: <strong>{{ item.quantity }}</strong></span>
+                      <span class="item-subtotal">{{ item.subtotal | currency:'BRL':'symbol':'1.2-2' }}</span>
                     </div>
+                  </div>
 
-                    <mat-card-content class="card-body">
-                      <div class="badges-row">
-                        @if (product.subcategoryNome) {
-                          <span class="badge badge-sub">{{ product.subcategoryNome }}</span>
-                        } @else {
-                          <span class="badge badge-tipo">{{ product.tipo }}</span>
-                        }
-                        <span class="badge badge-material">{{ product.material }}</span>
-                      </div>
-                      <h3 class="product-title">{{ product.nome }}</h3>
-                      <span class="product-sku">SKU: {{ product.sku }}</span>
+                  <button mat-icon-button color="warn" class="remove-btn" (click)="removeItem(item.itemId)" matTooltip="Remover item">
+                    <mat-icon>delete_outline</mat-icon>
+                  </button>
+                </div>
+              }
+            </div>
+          } @else {
+            <div class="cart-empty-state">
+              <mat-icon class="empty-cart-icon">remove_shopping_cart</mat-icon>
+              <h3>Seu carrinho está vazio</h3>
+              <p>Explore nossas coleções de alta joalheria e adicione suas peças favoritas.</p>
+            </div>
+          }
+        </div>
 
-                      <div class="card-footer">
-                        <div class="price-wrapper">
-                          <span class="price-label">Preço</span>
-                          <span class="price-value">{{ product.preco | currency:'BRL':'symbol':'1.2-2' }}</span>
+        @if (currentCart && currentCart.items.length > 0) {
+          <div class="cart-drawer-footer">
+            <div class="cart-summary-row">
+              <span>Total do Pedido:</span>
+              <strong class="total-price">{{ currentCart.valorTotal | currency:'BRL':'symbol':'1.2-2' }}</strong>
+            </div>
+            <p class="reservation-notice">
+              <mat-icon>timer</mat-icon>
+              <span>Peças reservadas temporariamente no seu carrinho.</span>
+            </p>
+
+            <button mat-raised-button color="primary" class="checkout-btn">
+              <mat-icon>lock</mat-icon>
+              <span>Finalizar Compra</span>
+            </button>
+          </div>
+        }
+      </mat-sidenav>
+
+      <!-- CONTEÚDO PRINCIPAL DO CATÁLOGO -->
+      <mat-sidenav-content class="catalog-sidenav-content">
+        <div class="catalog-page-container">
+          <header class="catalog-hero">
+            <div class="hero-content">
+              <h1 class="gold-text">Coleção Exclusiva SmartJewel</h1>
+              <p>Semijoias com design de alta joalheria, banho de ouro 18k, prata 925 e pedras selecionadas.</p>
+            </div>
+
+            <!-- BOTÃO FLUTUANTE DO CARRINHO COM BADGE DE QUANTIDADE DE ITENS -->
+            <div class="cart-trigger-container">
+              <button
+                mat-fab
+                class="cart-fab"
+                (click)="cartSidenav.open()"
+                matTooltip="Ver Carrinho de Compras"
+              >
+                <mat-icon [matBadge]="cartTotalItems" [matBadgeHidden]="cartTotalItems === 0" matBadgeColor="accent">
+                  shopping_bag
+                </mat-icon>
+              </button>
+            </div>
+          </header>
+
+          <div class="catalog-layout">
+            <!-- BARRA DE NAVEGAÇÃO / MENU LATERAL ESQUERDO DE CATEGORIAS -->
+            <aside class="sidebar-category-nav glass-card">
+              <div class="sidebar-header">
+                <mat-icon class="gold-icon">menu_book</mat-icon>
+                <h2>Categorias</h2>
+              </div>
+
+              <div class="categories-list">
+                <button
+                  mat-button
+                  class="nav-category-btn"
+                  [class.active-btn]="!selectedCategoryId && !selectedSubcategoryId"
+                  (click)="resetCategoryFilters()"
+                >
+                  <mat-icon class="nav-icon">auto_awesome</mat-icon>
+                  <span>Todas as Joias</span>
+                </button>
+
+                @for (cat of categories; track cat.id) {
+                  <button
+                    mat-button
+                    [matMenuTriggerFor]="subMenu"
+                    class="nav-category-btn"
+                    [class.active-btn]="selectedCategoryId === cat.id"
+                  >
+                    <mat-icon class="nav-icon">{{ getCategoryIcon(cat.nome) }}</mat-icon>
+                    <span>{{ cat.nome }}</span>
+                    <mat-icon class="chevron-icon">chevron_right</mat-icon>
+                  </button>
+
+                  <mat-menu #subMenu="matMenu" class="luxury-sub-menu" xPosition="after">
+                    <button mat-menu-item (click)="selectCategory(cat)">
+                      <mat-icon class="gold-icon">view_list</mat-icon>
+                      <span>Ver todos de {{ cat.nome }}</span>
+                    </button>
+                    <mat-divider></mat-divider>
+                    @for (sub of cat.subcategories; track sub.id) {
+                      <button
+                        mat-menu-item
+                        (click)="selectSubcategory(cat, sub)"
+                        [class.selected-sub]="selectedSubcategoryId === sub.id"
+                      >
+                        <mat-icon>diamond</mat-icon>
+                        <span>{{ sub.nome }}</span>
+                      </button>
+                    }
+                  </mat-menu>
+                }
+              </div>
+            </aside>
+
+            <!-- ÁREA PRINCIPAL DO CATÁLOGO DE PRODUTOS -->
+            <main class="main-catalog-content">
+              <!-- BARRA DE FILTROS SECUNDÁRIOS -->
+              <section class="filters-section glass-card">
+                @if (activeFilterLabel) {
+                  <div class="active-filter-banner">
+                    <span class="active-label">Filtro Ativo: <strong>{{ activeFilterLabel }}</strong></span>
+                    <button mat-icon-button (click)="resetFilters()" matTooltip="Remover Filtro">
+                      <mat-icon>close</mat-icon>
+                    </button>
+                  </div>
+                }
+
+                <div class="filter-group">
+                  <span class="filter-label"><mat-icon class="gold-icon">style</mat-icon> Material / Cor:</span>
+                  <mat-chip-listbox aria-label="Filtro Material">
+                    <mat-chip-option [selected]="selectedMaterial === null" (selectionChange)="onMaterialChange(null, $event)" class="custom-chip">Todos</mat-chip-option>
+                    @for (mat of materialOptions; track mat.value) {
+                      <mat-chip-option [selected]="selectedMaterial === mat.value" (selectionChange)="onMaterialChange(mat.value, $event)" class="custom-chip">{{ mat.label }}</mat-chip-option>
+                    }
+                  </mat-chip-listbox>
+                </div>
+              </section>
+
+              <!-- GRID DE PEÇAS DE SEMIJOIAS -->
+              <section class="products-section">
+                @if (isLoading) {
+                  <div class="loading-state">
+                    <mat-spinner diameter="48" color="primary"></mat-spinner>
+                    <p>Buscando peças...</p>
+                  </div>
+                } @else if (productsPage && productsPage.content.length > 0) {
+                  <div class="product-grid">
+                    @for (product of productsPage.content; track product.id) {
+                      <mat-card class="product-card glass-card">
+                        <div class="card-image-wrapper">
+                          @if (product.imageUrl && !imageErrors[product.id]) {
+                            <img [src]="product.imageUrl" (error)="onImageError(product.id)" [alt]="product.nome" class="product-image" />
+                          } @else {
+                            <div class="product-image-fallback"><mat-icon>diamond</mat-icon></div>
+                          }
+                          <span class="status-chip" [class.in-stock]="product.quantidadeEstoque > 0" [class.out-stock]="product.quantidadeEstoque <= 0">
+                            {{ product.quantidadeEstoque > 0 ? 'Disponível' : 'Esgotado' }}
+                          </span>
                         </div>
 
-                        <button mat-icon-button color="accent" aria-label="Favoritar">
-                          <mat-icon>favorite_border</mat-icon>
-                        </button>
-                      </div>
-                    </mat-card-content>
-                  </mat-card>
-                }
-              </div>
+                        <mat-card-content class="card-body">
+                          <div class="badges-row">
+                            @if (product.subcategoryNome) {
+                              <span class="badge badge-sub">{{ product.subcategoryNome }}</span>
+                            } @else {
+                              <span class="badge badge-tipo">{{ product.tipo }}</span>
+                            }
+                            <span class="badge badge-material">{{ product.material }}</span>
+                          </div>
+                          <h3 class="product-title">{{ product.nome }}</h3>
+                          <span class="product-sku">SKU: {{ product.sku }}</span>
 
-              <div class="pagination-wrapper glass-card">
-                <mat-paginator
-                  [length]="productsPage.totalElements"
-                  [pageSize]="pageSize"
-                  [pageIndex]="pageIndex"
-                  [pageSizeOptions]="[8, 12, 24, 48]"
-                  (page)="onPageChange($event)"
-                  showFirstLastButtons
-                ></mat-paginator>
-              </div>
-            } @else {
-              <div class="empty-state glass-card">
-                <mat-icon class="empty-icon">search_off</mat-icon>
-                <h2>Nenhuma semijoia encontrada nesta categoria</h2>
-                <button mat-stroked-button color="primary" (click)="resetFilters()">Limpar Filtros</button>
-              </div>
-            }
-          </section>
-        </main>
-      </div>
-    </div>
+                          <div class="card-footer">
+                            <div class="price-wrapper">
+                              <span class="price-label">Preço</span>
+                              <span class="price-value">{{ product.preco | currency:'BRL':'symbol':'1.2-2' }}</span>
+                            </div>
+
+                            <button
+                              mat-raised-button
+                              color="primary"
+                              class="add-to-cart-btn"
+                              [disabled]="product.quantidadeEstoque <= 0 || isAdding[product.id]"
+                              (click)="addToCart(product, cartSidenav)"
+                            >
+                              <mat-icon>shopping_bag</mat-icon>
+                              <span>{{ product.quantidadeEstoque > 0 ? 'Adicionar' : 'Esgotado' }}</span>
+                            </button>
+                          </div>
+                        </mat-card-content>
+                      </mat-card>
+                    }
+                  </div>
+
+                  <div class="pagination-wrapper glass-card">
+                    <mat-paginator
+                      [length]="productsPage.totalElements"
+                      [pageSize]="pageSize"
+                      [pageIndex]="pageIndex"
+                      [pageSizeOptions]="[8, 12, 24, 48]"
+                      (page)="onPageChange($event)"
+                      showFirstLastButtons
+                    ></mat-paginator>
+                  </div>
+                } @else {
+                  <div class="empty-state glass-card">
+                    <mat-icon class="empty-icon">search_off</mat-icon>
+                    <h2>Nenhuma semijoia encontrada nesta categoria</h2>
+                    <button mat-stroked-button color="primary" (click)="resetFilters()">Limpar Filtros</button>
+                  </div>
+                }
+              </section>
+            </main>
+          </div>
+        </div>
+      </mat-sidenav-content>
+    </mat-sidenav-container>
   `,
   styles: [`
+    .catalog-sidenav-container { min-height: 100vh; background: transparent; }
+    .catalog-sidenav-content { background: transparent; }
     .catalog-page-container { max-width: 1280px; margin: 1.5rem auto 3rem; padding: 0 1rem; }
-    .catalog-hero { text-align: center; margin-bottom: 2rem; }
+    .catalog-hero { position: relative; text-align: center; margin-bottom: 2rem; }
     .gold-text { font-size: 2.4rem; font-weight: 700; color: #D4AF37; margin-bottom: 0.5rem; }
     .catalog-hero p { color: #94a3b8; font-size: 1.1rem; }
+
+    .cart-trigger-container { position: absolute; right: 0; top: 0; }
+    .cart-fab { background: linear-gradient(135deg, #D4AF37 0%, #b28b29 100%) !important; color: #1A1C1E !important; }
+
+    /* SIDENAV CARRINHO DESLIZANTE */
+    .cart-sidenav { width: 380px; max-width: 90vw; background: #2A2D30; border-left: 1px solid rgba(212, 175, 55, 0.3); display: flex; flex-direction: column; }
+    .cart-drawer-header { display: flex; align-items: center; justify-content: space-between; padding: 1.2rem 1.5rem; border-bottom: 1px solid rgba(212, 175, 55, 0.2); background: rgba(0,0,0,0.2); }
+    .cart-drawer-title { display: flex; align-items: center; gap: 0.6rem; h2 { margin: 0; font-size: 1.2rem; font-weight: 700; color: #D4AF37; } }
+    .cart-drawer-body { padding: 1rem 1.5rem; flex: 1; overflow-y: auto; }
+
+    .cart-items-list { display: flex; flex-direction: column; gap: 1rem; }
+    .cart-item-card { display: flex; align-items: center; gap: 0.8rem; padding: 0.8rem; background: rgba(255,255,255,0.03); border-radius: 10px; border: 1px solid rgba(255,255,255,0.08); }
+    .cart-item-thumb { width: 56px; height: 56px; border-radius: 8px; overflow: hidden; background: #1A1C1E; flex-shrink: 0; img { width: 100%; height: 100%; object-fit: cover; } }
+    .thumb-fallback { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: #D4AF37; }
+    .cart-item-info { flex: 1; }
+    .item-name { margin: 0 0 0.2rem; font-size: 0.95rem; font-weight: 700; color: #E2E2E6; line-height: 1.2; }
+    .item-sku { font-size: 0.7rem; color: #64748b; font-family: monospace; display: block; margin-bottom: 0.3rem; }
+    .item-qty-price { display: flex; align-items: center; justify-content: space-between; font-size: 0.85rem; }
+    .item-qty { color: #94a3b8; }
+    .item-subtotal { font-weight: 700; color: #D4AF37; }
+    .remove-btn { flex-shrink: 0; }
+
+    .cart-empty-state { text-align: center; padding: 3rem 1rem; color: #94a3b8; }
+    .empty-cart-icon { font-size: 4rem; width: 4rem; height: 4rem; color: #64748b; margin-bottom: 1rem; }
+
+    .cart-drawer-footer { padding: 1.2rem 1.5rem; background: rgba(0,0,0,0.3); border-top: 1px solid rgba(212, 175, 55, 0.2); display: flex; flex-direction: column; gap: 0.8rem; }
+    .cart-summary-row { display: flex; justify-content: space-between; align-items: center; font-size: 1.1rem; color: #E2E2E6; }
+    .total-price { font-size: 1.4rem; color: #D4AF37; }
+    .reservation-notice { display: flex; align-items: center; gap: 0.4rem; margin: 0; font-size: 0.75rem; color: #4fb381; mat-icon { font-size: 1rem; width: 1rem; height: 1rem; } }
+    .checkout-btn { width: 100%; height: 44px; border-radius: 8px; font-weight: 700; background: linear-gradient(135deg, #D4AF37 0%, #b28b29 100%) !important; color: #1A1C1E !important; }
 
     /* LAYOUT COM SIDEBAR */
     .catalog-layout { display: grid; grid-template-columns: 260px 1fr; gap: 1.8rem; align-items: start; }
@@ -234,18 +379,23 @@ import { CatalogService, CategoryService, Product, ProductMaterial, ProductType,
     .card-footer { margin-top: auto; display: flex; align-items: center; justify-content: space-between; padding-top: 0.8rem; border-top: 1px solid rgba(255,255,255,0.08); }
     .price-label { font-size: 0.7rem; color: #94a3b8; text-transform: uppercase; }
     .price-value { font-size: 1.3rem; font-weight: 700; color: #D4AF37; }
+    .add-to-cart-btn { background: linear-gradient(135deg, #D4AF37 0%, #b28b29 100%) !important; color: #1A1C1E !important; font-weight: 700; height: 38px; border-radius: 8px; font-size: 0.8rem; }
     .loading-state, .empty-state { text-align: center; padding: 4rem 1rem; color: #94a3b8; }
   `]
 })
 export class CatalogComponent implements OnInit {
   private catalogService = inject(CatalogService);
   private categoryService = inject(CategoryService);
+  private cartService = inject(CartService);
+  private snackBar = inject(MatSnackBar);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
 
   categories: Category[] = [];
   productsPage: Page<Product> | null = null;
+  currentCart: CartResponse | null = null;
   isLoading = false;
+  isAdding: Record<string, boolean> = {};
   imageErrors: Record<string, boolean> = {};
 
   selectedCategoryId: string | null = null;
@@ -269,11 +419,52 @@ export class CatalogComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadCategories();
+    this.subscribeCart();
+
     this.route.queryParams.subscribe(params => {
       this.selectedCategoryId = params['categoryId'] || null;
       this.selectedSubcategoryId = params['subcategoryId'] || null;
       this.updateActiveFilterLabel();
       this.loadCatalog();
+    });
+  }
+
+  subscribeCart(): void {
+    this.cartService.cart$.subscribe({
+      next: (cart) => (this.currentCart = cart)
+    });
+  }
+
+  get cartTotalItems(): number {
+    return this.currentCart?.totalItems || 0;
+  }
+
+  addToCart(product: Product, cartSidenav: MatSidenav): void {
+    this.isAdding[product.id] = true;
+
+    this.cartService.addToCart(product.id, 1).subscribe({
+      next: (cart) => {
+        this.isAdding[product.id] = false;
+        this.snackBar.open(`"${product.nome}" adicionado ao carrinho!`, 'Fechar', { duration: 3000 });
+        cartSidenav.open();
+        this.loadCatalog();
+      },
+      error: (err) => {
+        this.isAdding[product.id] = false;
+        this.snackBar.open('Erro ao adicionar produto: ' + (err.error?.message || err.message), 'Fechar', { duration: 4000 });
+      }
+    });
+  }
+
+  removeItem(itemId: string): void {
+    this.cartService.removeItem(itemId).subscribe({
+      next: () => {
+        this.snackBar.open('Item removido do carrinho.', 'Fechar', { duration: 3000 });
+        this.loadCatalog();
+      },
+      error: (err) => {
+        this.snackBar.open('Erro ao remover item: ' + (err.error?.message || err.message), 'Fechar', { duration: 4000 });
+      }
     });
   }
 
