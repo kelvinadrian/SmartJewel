@@ -10,6 +10,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { ProductService, Product } from '@shared-core';
 import { ProductFormDialogComponent } from './components/product-form-dialog/product-form-dialog.component';
 import { StockDialogComponent } from './components/stock-dialog/stock-dialog.component';
@@ -29,7 +30,8 @@ import { InventoryImportDialogComponent } from './components/inventory-import-di
     MatFormFieldModule,
     MatDialogModule,
     MatSnackBarModule,
-    MatTooltipModule
+    MatTooltipModule,
+    MatButtonToggleModule
   ],
   template: `
     <div class="admin-container">
@@ -58,86 +60,151 @@ import { InventoryImportDialogComponent } from './components/inventory-import-di
           <input matInput (keyup)="applyFilter($event)" placeholder="Ex: Anel Solitário, SKU-001..." #input />
           <mat-icon matPrefix color="primary">search</mat-icon>
         </mat-form-field>
+
+        <mat-button-toggle-group [value]="viewMode" (change)="viewMode = $event.value" class="view-toggle">
+          <mat-button-toggle value="table" matTooltip="Modo Tabela">
+            <mat-icon>view_list</mat-icon>
+          </mat-button-toggle>
+          <mat-button-toggle value="grid" matTooltip="Modo Cards (Catálogo com Foto Ampliada)">
+            <mat-icon>grid_view</mat-icon>
+          </mat-button-toggle>
+        </mat-button-toggle-group>
       </div>
 
-      <div class="table-container glass-card">
-        <table mat-table [dataSource]="dataSource" matSort class="full-width-table">
-          <ng-container matColumnDef="imageUrl">
-            <th mat-header-cell *matHeaderCellDef>Foto</th>
-            <td mat-cell *matCellDef="let element">
-              @if (element.imageUrl) {
-                <img [src]="element.imageUrl" alt="Foto" class="product-thumb" />
-              } @else {
-                <div class="thumb-placeholder" matTooltip="Sem Imagem"><mat-icon>diamond</mat-icon></div>
-              }
-            </td>
-          </ng-container>
+      <!-- MODO 1: TABELA -->
+      @if (viewMode === 'table') {
+        <div class="table-container glass-card">
+          <table mat-table [dataSource]="dataSource" matSort class="full-width-table">
+            <ng-container matColumnDef="imageUrl">
+              <th mat-header-cell *matHeaderCellDef>Foto</th>
+              <td mat-cell *matCellDef="let element">
+                @if (element.imageUrl && !imageErrors[element.id]) {
+                  <img [src]="element.imageUrl" (error)="onImageError(element.id)" alt="Foto" class="product-thumb" />
+                } @else {
+                  <div class="thumb-placeholder" matTooltip="Sem Imagem"><mat-icon>diamond</mat-icon></div>
+                }
+              </td>
+            </ng-container>
 
-          <ng-container matColumnDef="sku">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header>SKU</th>
-            <td mat-cell *matCellDef="let element" class="sku-cell">{{ element.sku }}</td>
-          </ng-container>
+            <ng-container matColumnDef="sku">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>SKU</th>
+              <td mat-cell *matCellDef="let element" class="sku-cell">{{ element.sku }}</td>
+            </ng-container>
 
-          <ng-container matColumnDef="nome">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header>Nome</th>
-            <td mat-cell *matCellDef="let element" class="name-cell">{{ element.nome }}</td>
-          </ng-container>
+            <ng-container matColumnDef="nome">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>Nome</th>
+              <td mat-cell *matCellDef="let element" class="name-cell">{{ element.nome }}</td>
+            </ng-container>
 
-          <ng-container matColumnDef="tipo">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header>Tipo</th>
-            <td mat-cell *matCellDef="let element">
-              <span class="badge badge-tipo">{{ element.tipo }}</span>
-            </td>
-          </ng-container>
+            <ng-container matColumnDef="tipo">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>Tipo</th>
+              <td mat-cell *matCellDef="let element">
+                <span class="badge badge-tipo">{{ element.tipo }}</span>
+              </td>
+            </ng-container>
 
-          <ng-container matColumnDef="material">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header>Material</th>
-            <td mat-cell *matCellDef="let element">
-              <span class="badge badge-material">{{ element.material }}</span>
-            </td>
-          </ng-container>
+            <ng-container matColumnDef="material">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>Material</th>
+              <td mat-cell *matCellDef="let element">
+                <span class="badge badge-material">{{ element.material }}</span>
+              </td>
+            </ng-container>
 
-          <ng-container matColumnDef="preco">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header>Preço</th>
-            <td mat-cell *matCellDef="let element" class="price-cell">
-              {{ element.preco | currency:'BRL':'symbol':'1.2-2' }}
-            </td>
-          </ng-container>
+            <ng-container matColumnDef="preco">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>Preço</th>
+              <td mat-cell *matCellDef="let element" class="price-cell">
+                {{ element.preco | currency:'BRL':'symbol':'1.2-2' }}
+              </td>
+            </ng-container>
 
-          <ng-container matColumnDef="quantidadeEstoque">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header>Estoque</th>
-            <td mat-cell *matCellDef="let element">
-              <span [class]="element.quantidadeEstoque > 0 ? 'stock-ok' : 'stock-zero'">
-                {{ element.quantidadeEstoque }} un
-              </span>
-            </td>
-          </ng-container>
+            <ng-container matColumnDef="quantidadeEstoque">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>Estoque</th>
+              <td mat-cell *matCellDef="let element">
+                <span [class]="element.quantidadeEstoque > 0 ? 'stock-ok' : 'stock-zero'">
+                  {{ element.quantidadeEstoque }} un
+                </span>
+              </td>
+            </ng-container>
 
-          <ng-container matColumnDef="actions">
-            <th mat-header-cell *matHeaderCellDef>Ações</th>
-            <td mat-cell *matCellDef="let element" class="actions-cell">
-              <button mat-icon-button color="accent" matTooltip="Movimentar Estoque" (click)="openStockDialog(element)">
-                <mat-icon>inventory_2</mat-icon>
-              </button>
-              <button mat-icon-button color="primary" matTooltip="Editar Produto" (click)="openEditDialog(element)">
-                <mat-icon>edit</mat-icon>
-              </button>
-              <button mat-icon-button color="warn" matTooltip="Excluir Produto" (click)="deleteProduct(element)">
-                <mat-icon>delete</mat-icon>
-              </button>
-            </td>
-          </ng-container>
+            <ng-container matColumnDef="actions">
+              <th mat-header-cell *matHeaderCellDef>Ações</th>
+              <td mat-cell *matCellDef="let element" class="actions-cell">
+                <button mat-icon-button color="accent" matTooltip="Movimentar Estoque" (click)="openStockDialog(element)">
+                  <mat-icon>inventory_2</mat-icon>
+                </button>
+                <button mat-icon-button color="primary" matTooltip="Editar Produto" (click)="openEditDialog(element)">
+                  <mat-icon>edit</mat-icon>
+                </button>
+                <button mat-icon-button color="warn" matTooltip="Excluir Produto" (click)="deleteProduct(element)">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </td>
+            </ng-container>
 
-          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-          <tr class="mat-row" *matNoDataRow>
-            <td class="mat-cell no-data-cell" colspan="8">
-              Nenhum produto encontrado.
-            </td>
-          </tr>
-        </table>
-        <mat-paginator [pageSizeOptions]="[5, 10, 25, 50]" showFirstLastButtons></mat-paginator>
-      </div>
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+            <tr class="mat-row" *matNoDataRow>
+              <td class="mat-cell no-data-cell" colspan="8">
+                Nenhum produto encontrado.
+              </td>
+            </tr>
+          </table>
+          <mat-paginator [pageSizeOptions]="[5, 10, 25, 50]" showFirstLastButtons></mat-paginator>
+        </div>
+      }
+
+      <!-- MODO 2: GRID / CARDS (ESTILO CATÁLOGO COM FOTO AMPLIADA) -->
+      @if (viewMode === 'grid') {
+        <div class="cards-grid">
+          @for (product of filteredProducts; track product.id) {
+            <div class="product-card glass-card">
+              <div class="card-image-container">
+                @if (product.imageUrl && !imageErrors[product.id]) {
+                  <img [src]="product.imageUrl" (error)="onImageError(product.id)" alt="{{ product.nome }}" class="card-image" />
+                } @else {
+                  <div class="card-image-placeholder">
+                    <mat-icon class="placeholder-icon">diamond</mat-icon>
+                    <span>Sem Foto</span>
+                  </div>
+                }
+                <span [class]="product.quantidadeEstoque > 0 ? 'stock-badge stock-ok-badge' : 'stock-badge stock-zero-badge'">
+                  Estoque: {{ product.quantidadeEstoque }} un
+                </span>
+              </div>
+
+              <div class="card-body">
+                <div class="card-meta">
+                  <span class="sku-tag">{{ product.sku }}</span>
+                  <span class="badge badge-tipo">{{ product.tipo }}</span>
+                </div>
+
+                <h3 class="card-title">{{ product.nome }}</h3>
+                <p class="material-text"><span class="badge badge-material">{{ product.material }}</span></p>
+                <p class="card-price">{{ product.preco | currency:'BRL':'symbol':'1.2-2' }}</p>
+              </div>
+
+              <div class="card-actions">
+                <button mat-stroked-button color="accent" class="action-btn" matTooltip="Movimentar Estoque" (click)="openStockDialog(product)">
+                  <mat-icon>inventory_2</mat-icon>
+                  <span>Estoque</span>
+                </button>
+                <button mat-stroked-button color="primary" class="action-btn" matTooltip="Editar Produto" (click)="openEditDialog(product)">
+                  <mat-icon>edit</mat-icon>
+                  <span>Editar</span>
+                </button>
+                <button mat-icon-button color="warn" matTooltip="Excluir Produto" (click)="deleteProduct(product)">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </div>
+            </div>
+          } @empty {
+            <div class="no-data-card glass-card">
+              <mat-icon color="primary">info</mat-icon>
+              <p>Nenhum produto cadastrado ou encontrado no filtro.</p>
+            </div>
+          }
+        </div>
+      }
     </div>
   `,
   styles: [`
@@ -148,8 +215,9 @@ import { InventoryImportDialogComponent } from './components/inventory-import-di
     .header-actions { display: flex; align-items: center; gap: 0.8rem; }
     .import-btn { border-color: rgba(212, 175, 55, 0.4) !important; color: #D4AF37 !important; height: 44px; border-radius: 10px; }
     .add-btn { background: linear-gradient(135deg, #D4AF37 0%, #b28b29 100%) !important; color: #1A1C1E !important; font-weight: 700; height: 44px; border-radius: 10px; }
-    .toolbar-section { padding: 1rem; margin-bottom: 1.5rem; }
-    .search-field { width: 100%; margin-bottom: -1.25em; }
+    .toolbar-section { padding: 1rem; margin-bottom: 1.5rem; display: flex; gap: 1rem; align-items: center; justify-content: space-between; }
+    .search-field { flex: 1; margin-bottom: -1.25em; }
+    .view-toggle { background: rgba(255, 255, 255, 0.05); border-radius: 8px; border: 1px solid rgba(212, 175, 55, 0.3); }
     .full-width-table { width: 100%; background: transparent !important; }
     .product-thumb { width: 48px; height: 48px; border-radius: 8px; object-fit: cover; border: 1px solid rgba(212, 175, 55, 0.3); }
     .thumb-placeholder { width: 48px; height: 48px; border-radius: 8px; background: rgba(212, 175, 55, 0.1); display: flex; align-items: center; justify-content: center; color: #D4AF37; }
@@ -162,6 +230,30 @@ import { InventoryImportDialogComponent } from './components/inventory-import-di
     .stock-ok { color: #2E8B57; font-weight: 700; }
     .stock-zero { color: #f87171; font-weight: 700; }
     .no-data-cell { text-align: center; padding: 2rem; color: #94a3b8; }
+
+    /* CARDS GRID DESIGN SYSTEM */
+    .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; margin-top: 1rem; }
+    .product-card { display: flex; flex-direction: column; overflow: hidden; border-radius: 12px; transition: transform 0.2s ease, box-shadow 0.2s ease; border: 1px solid rgba(212, 175, 55, 0.25); background: #2A2D30; }
+    .product-card:hover { transform: translateY(-4px); box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4), 0 0 15px rgba(212, 175, 55, 0.2); }
+    .card-image-container { position: relative; width: 100%; height: 220px; background: rgba(0,0,0,0.3); overflow: hidden; }
+    .card-image { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s ease; }
+    .product-card:hover .card-image { transform: scale(1.05); }
+    .card-image-placeholder { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #D4AF37; background: rgba(212, 175, 55, 0.05); gap: 0.5rem; }
+    .placeholder-icon { font-size: 40px; width: 40px; height: 40px; }
+    .stock-badge { position: absolute; top: 10px; right: 10px; padding: 0.3rem 0.6rem; border-radius: 6px; font-size: 0.75rem; font-weight: 700; backdrop-filter: blur(8px); }
+    .stock-ok-badge { background: rgba(46, 139, 87, 0.85); color: #ffffff; }
+    .stock-zero-badge { background: rgba(239, 68, 68, 0.85); color: #ffffff; }
+
+    .card-body { padding: 1.2rem; flex: 1; display: flex; flex-direction: column; gap: 0.5rem; }
+    .card-meta { display: flex; justify-content: space-between; align-items: center; }
+    .sku-tag { font-family: monospace; font-size: 0.8rem; color: #94a3b8; font-weight: 600; }
+    .card-title { font-size: 1.1rem; font-weight: 700; color: #E2E2E6; margin: 0; line-height: 1.3; }
+    .material-text { margin: 0; }
+    .card-price { font-size: 1.3rem; font-weight: 800; color: #D4AF37; margin-top: auto; padding-top: 0.5rem; }
+
+    .card-actions { padding: 0.8rem 1.2rem; background: rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; border-top: 1px solid rgba(255,255,255,0.05); }
+    .action-btn { flex: 1; font-size: 0.8rem; }
+    .no-data-card { grid-column: 1 / -1; padding: 3rem; text-align: center; color: #94a3b8; display: flex; flex-direction: column; align-items: center; gap: 1rem; }
   `]
 })
 export class AdminDashboardComponent implements OnInit, AfterViewInit {
@@ -169,6 +261,9 @@ export class AdminDashboardComponent implements OnInit, AfterViewInit {
   private dialog = inject(MatDialog);
   private snackBar = inject(MatSnackBar);
   private cdr = inject(ChangeDetectorRef);
+
+  viewMode: 'table' | 'grid' = 'table';
+  imageErrors: Record<string, boolean> = {};
 
   displayedColumns: string[] = ['imageUrl', 'sku', 'nome', 'tipo', 'material', 'preco', 'quantidadeEstoque', 'actions'];
   dataSource = new MatTableDataSource<Product>([]);
@@ -183,6 +278,14 @@ export class AdminDashboardComponent implements OnInit, AfterViewInit {
   ngAfterViewInit(): void {
     this.dataSource.paginator = this.paginator;
     this.dataSource.sort = this.sort;
+  }
+
+  get filteredProducts(): Product[] {
+    return this.dataSource.filteredData;
+  }
+
+  onImageError(productId: string): void {
+    this.imageErrors[productId] = true;
   }
 
   loadProducts(): void {
