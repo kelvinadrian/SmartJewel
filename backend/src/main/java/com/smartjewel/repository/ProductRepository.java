@@ -17,5 +17,7 @@ public interface ProductRepository extends JpaRepository<Product, UUID>, JpaSpec
 
     boolean existsBySku(String sku);
 
-    List<Product> findByTipo(ProductType tipo);
+    List<Product> findByProductType(ProductType productType);
+
+    List<Product> findByProductTypeId(UUID productTypeId);
 }
