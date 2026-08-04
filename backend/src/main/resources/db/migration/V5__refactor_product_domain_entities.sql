@@ -61,35 +61,35 @@ WHERE NOT EXISTS (SELECT 1 FROM product_types WHERE nome = 'Escapulario');
 
 -- 4. Carga inicial de material_colors (Materiais e Cores)
 INSERT INTO material_colors (id, nome, descricao, created_at, created_by)
-SELECT 'm1000000-0000-0000-0000-000000000001', 'Banhado a Ouro', 'Ouro 18k banhado com alta durabilidade', CURRENT_TIMESTAMP, 'SYSTEM'
+SELECT 'b1000000-0000-0000-0000-000000000001', 'Banhado a Ouro', 'Ouro 18k banhado com alta durabilidade', CURRENT_TIMESTAMP, 'SYSTEM'
 WHERE NOT EXISTS (SELECT 1 FROM material_colors WHERE nome = 'Banhado a Ouro');
 
 INSERT INTO material_colors (id, nome, descricao, created_at, created_by)
-SELECT 'm1000000-0000-0000-0000-000000000002', 'Prata 925', 'Prata 925 maciça de alta joalheria', CURRENT_TIMESTAMP, 'SYSTEM'
+SELECT 'b1000000-0000-0000-0000-000000000002', 'Prata 925', 'Prata 925 maciça de alta joalheria', CURRENT_TIMESTAMP, 'SYSTEM'
 WHERE NOT EXISTS (SELECT 1 FROM material_colors WHERE nome = 'Prata 925');
 
 INSERT INTO material_colors (id, nome, descricao, created_at, created_by)
-SELECT 'm1000000-0000-0000-0000-000000000003', 'Prata', 'Acabamento prateado brilhante', CURRENT_TIMESTAMP, 'SYSTEM'
+SELECT 'b1000000-0000-0000-0000-000000000003', 'Prata', 'Acabamento prateado brilhante', CURRENT_TIMESTAMP, 'SYSTEM'
 WHERE NOT EXISTS (SELECT 1 FROM material_colors WHERE nome = 'Prata');
 
 INSERT INTO material_colors (id, nome, descricao, created_at, created_by)
-SELECT 'm1000000-0000-0000-0000-000000000004', 'Dourado', 'Acabamento dourado radiante', CURRENT_TIMESTAMP, 'SYSTEM'
+SELECT 'b1000000-0000-0000-0000-000000000004', 'Dourado', 'Acabamento dourado radiante', CURRENT_TIMESTAMP, 'SYSTEM'
 WHERE NOT EXISTS (SELECT 1 FROM material_colors WHERE nome = 'Dourado');
 
 INSERT INTO material_colors (id, nome, descricao, created_at, created_by)
-SELECT 'm1000000-0000-0000-0000-000000000005', 'Banhado a Prata', 'Banho de prata esterlina', CURRENT_TIMESTAMP, 'SYSTEM'
+SELECT 'b1000000-0000-0000-0000-000000000005', 'Banhado a Prata', 'Banho de prata esterlina', CURRENT_TIMESTAMP, 'SYSTEM'
 WHERE NOT EXISTS (SELECT 1 FROM material_colors WHERE nome = 'Banhado a Prata');
 
 INSERT INTO material_colors (id, nome, descricao, created_at, created_by)
-SELECT 'm1000000-0000-0000-0000-000000000006', 'Ouro 18k', 'Ouro 18k de teor nobre', CURRENT_TIMESTAMP, 'SYSTEM'
+SELECT 'b1000000-0000-0000-0000-000000000006', 'Ouro 18k', 'Ouro 18k de teor nobre', CURRENT_TIMESTAMP, 'SYSTEM'
 WHERE NOT EXISTS (SELECT 1 FROM material_colors WHERE nome = 'Ouro 18k');
 
 INSERT INTO material_colors (id, nome, descricao, created_at, created_by)
-SELECT 'm1000000-0000-0000-0000-000000000007', 'Rhodium', 'Banho de ródio branco protetor', CURRENT_TIMESTAMP, 'SYSTEM'
+SELECT 'b1000000-0000-0000-0000-000000000007', 'Rhodium', 'Banho de ródio branco protetor', CURRENT_TIMESTAMP, 'SYSTEM'
 WHERE NOT EXISTS (SELECT 1 FROM material_colors WHERE nome = 'Rhodium');
 
 INSERT INTO material_colors (id, nome, descricao, created_at, created_by)
-SELECT 'm1000000-0000-0000-0000-000000000008', 'Rhodium Negro', 'Ródio negro sofisticado', CURRENT_TIMESTAMP, 'SYSTEM'
+SELECT 'b1000000-0000-0000-0000-000000000008', 'Rhodium Negro', 'Ródio negro sofisticado', CURRENT_TIMESTAMP, 'SYSTEM'
 WHERE NOT EXISTS (SELECT 1 FROM material_colors WHERE nome = 'Rhodium Negro');
 
 -- 5. Atualização da tabela categories (adicionando product_type_id)
