@@ -56,6 +56,14 @@ public class Product extends BaseEntity {
     @Column(name = "quantidade_estoque", nullable = false)
     private Integer quantidadeEstoque;
 
+    @Builder.Default
+    @Column(name = "available_quantity", nullable = false)
+    private Integer availableQuantity = 0;
+
+    @Builder.Default
+    @Column(name = "reserved_quantity", nullable = false)
+    private Integer reservedQuantity = 0;
+
     @Column(name = "image_url")
     private String imageUrl;
 
