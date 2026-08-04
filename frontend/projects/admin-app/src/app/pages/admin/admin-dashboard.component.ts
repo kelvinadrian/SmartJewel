@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, ViewChild, AfterViewInit } from '@angular/core';
+import { Component, inject, OnInit, ViewChild, AfterViewInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
@@ -11,8 +11,8 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ProductService, Product } from '@shared-core';
-import { ProductFormDialogComponent, ProductDialogData } from './components/product-form-dialog/product-form-dialog.component';
-import { StockDialogComponent, StockDialogData } from './components/stock-dialog/stock-dialog.component';
+import { ProductFormDialogComponent } from './components/product-form-dialog/product-form-dialog.component';
+import { StockDialogComponent } from './components/stock-dialog/stock-dialog.component';
 import { InventoryImportDialogComponent } from './components/inventory-import-dialog/inventory-import-dialog.component';
 
 @Component({
@@ -68,7 +68,7 @@ import { InventoryImportDialogComponent } from './components/inventory-import-di
               @if (element.imageUrl) {
                 <img [src]="element.imageUrl" alt="Foto" class="product-thumb" />
               } @else {
-                <div class="thumb-placeholder"><mat-icon>diamond</mat-icon></div>
+                <div class="thumb-placeholder" matTooltip="Sem Imagem"><mat-icon>diamond</mat-icon></div>
               }
             </td>
           </ng-container>
@@ -132,7 +132,7 @@ import { InventoryImportDialogComponent } from './components/inventory-import-di
           <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
           <tr class="mat-row" *matNoDataRow>
             <td class="mat-cell no-data-cell" colspan="8">
-              Nenhum produto encontrado para "{{ input.value }}"
+              Nenhum produto encontrado.
             </td>
           </tr>
         </table>
@@ -168,6 +168,7 @@ export class AdminDashboardComponent implements OnInit, AfterViewInit {
   private productService = inject(ProductService);
   private dialog = inject(MatDialog);
   private snackBar = inject(MatSnackBar);
+  private cdr = inject(ChangeDetectorRef);
 
   displayedColumns: string[] = ['imageUrl', 'sku', 'nome', 'tipo', 'material', 'preco', 'quantidadeEstoque', 'actions'];
   dataSource = new MatTableDataSource<Product>([]);
@@ -175,7 +176,10 @@ export class AdminDashboardComponent implements OnInit, AfterViewInit {
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
 
-  ngOnInit(): void { this.loadProducts(); }
+  ngOnInit(): void {
+    this.loadProducts();
+  }
+
   ngAfterViewInit(): void {
     this.dataSource.paginator = this.paginator;
     this.dataSource.sort = this.sort;
@@ -183,72 +187,125 @@ export class AdminDashboardComponent implements OnInit, AfterViewInit {
 
   loadProducts(): void {
     this.productService.getProducts().subscribe({
-      next: (products) => (this.dataSource.data = products),
-      error: () => this.snackBar.open('Erro ao carregar produtos.', 'Fechar', { duration: 4000 })
+      next: (products) => {
+        this.dataSource.data = [...products];
+        if (this.paginator) this.dataSource.paginator = this.paginator;
+        if (this.sort) this.dataSource.sort = this.sort;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        this.snackBar.open('Erro ao carregar lista de produtos: ' + (err.error?.message || err.message), 'Fechar', { duration: 4000 });
+      }
     });
   }
 
   applyFilter(event: Event): void {
     const filterValue = (event.target as HTMLInputElement).value;
     this.dataSource.filter = filterValue.trim().toLowerCase();
-    if (this.dataSource.paginator) this.dataSource.paginator.firstPage();
+    if (this.dataSource.paginator) {
+      this.dataSource.paginator.firstPage();
+    }
   }
 
   openImportDialog(): void {
     const ref = this.dialog.open(InventoryImportDialogComponent, { width: '540px' });
-    ref.afterClosed().subscribe(refresh => { if (refresh) this.loadProducts(); });
+    ref.afterClosed().subscribe(refresh => {
+      if (refresh) this.loadProducts();
+    });
   }
 
   openCreateDialog(): void {
     const ref = this.dialog.open(ProductFormDialogComponent, { width: '500px', data: { mode: 'create' } });
     ref.afterClosed().subscribe(res => {
-      if (res) {
-        this.productService.createProduct(res.formValue).subscribe({
-          next: (created) => {
-            if (res.file) {
-              this.productService.uploadProductImage(created.id, res.file).subscribe(() => this.loadProducts());
-            } else {
-              this.loadProducts();
-            }
+      if (!res) return;
+
+      this.productService.createProduct(res.formValue).subscribe({
+        next: (created) => {
+          if (res.file) {
+            this.productService.uploadProductImage(created.id, res.file).subscribe({
+              next: () => {
+                this.snackBar.open('Produto cadastrado e foto salva no Bucket S3!', 'Fechar', { duration: 3000 });
+                this.loadProducts();
+              },
+              error: (err) => {
+                this.snackBar.open('Produto cadastrado, mas falhou o upload da foto: ' + (err.error?.message || err.message), 'Fechar', { duration: 5000 });
+                this.loadProducts();
+              }
+            });
+          } else {
+            this.snackBar.open('Produto cadastrado com sucesso!', 'Fechar', { duration: 3000 });
+            this.loadProducts();
           }
-        });
-      }
+        },
+        error: (err) => {
+          this.snackBar.open('Erro ao cadastrar produto: ' + (err.error?.message || err.message), 'Fechar', { duration: 4000 });
+        }
+      });
     });
   }
 
   openEditDialog(product: Product): void {
     const ref = this.dialog.open(ProductFormDialogComponent, { width: '500px', data: { mode: 'edit', product } });
     ref.afterClosed().subscribe(res => {
-      if (res) {
-        this.productService.updateProduct(product.id, res.formValue).subscribe({
-          next: (updated) => {
-            if (res.file) {
-              this.productService.uploadProductImage(updated.id, res.file).subscribe(() => this.loadProducts());
-            } else {
-              this.loadProducts();
-            }
+      if (!res) return;
+
+      this.productService.updateProduct(product.id, res.formValue).subscribe({
+        next: (updated) => {
+          if (res.file) {
+            this.productService.uploadProductImage(updated.id, res.file).subscribe({
+              next: () => {
+                this.snackBar.open('Produto e foto atualizados com sucesso!', 'Fechar', { duration: 3000 });
+                this.loadProducts();
+              },
+              error: (err) => {
+                this.snackBar.open('Produto atualizado, mas erro no envio da foto: ' + (err.error?.message || err.message), 'Fechar', { duration: 5000 });
+                this.loadProducts();
+              }
+            });
+          } else {
+            this.snackBar.open('Produto atualizado com sucesso!', 'Fechar', { duration: 3000 });
+            this.loadProducts();
           }
-        });
-      }
+        },
+        error: (err) => {
+          this.snackBar.open('Erro ao atualizar produto: ' + (err.error?.message || err.message), 'Fechar', { duration: 4000 });
+        }
+      });
     });
   }
 
   openStockDialog(product: Product): void {
     const ref = this.dialog.open(StockDialogComponent, { width: '400px', data: { product } });
     ref.afterClosed().subscribe(res => {
-      if (res) {
-        const action$ = res.operation === 'ADD'
-          ? this.productService.addStock(product.id, res.quantidade)
-          : this.productService.removeStock(product.id, res.quantidade);
+      if (!res) return;
 
-        action$.subscribe(() => this.loadProducts());
-      }
+      const action$ = res.operation === 'ADD'
+        ? this.productService.addStock(product.id, res.quantidade)
+        : this.productService.removeStock(product.id, res.quantidade);
+
+      action$.subscribe({
+        next: () => {
+          this.snackBar.open('Estoque atualizado com sucesso!', 'Fechar', { duration: 3000 });
+          this.loadProducts();
+        },
+        error: (err) => {
+          this.snackBar.open('Erro ao movimentar estoque: ' + (err.error?.message || err.message), 'Fechar', { duration: 4000 });
+        }
+      });
     });
   }
 
   deleteProduct(product: Product): void {
     if (confirm(`Excluir o produto "${product.nome}"?`)) {
-      this.productService.deleteProduct(product.id).subscribe(() => this.loadProducts());
+      this.productService.deleteProduct(product.id).subscribe({
+        next: () => {
+          this.snackBar.open('Produto excluído com sucesso!', 'Fechar', { duration: 3000 });
+          this.loadProducts();
+        },
+        error: (err) => {
+          this.snackBar.open('Erro ao excluir produto: ' + (err.error?.message || err.message), 'Fechar', { duration: 4000 });
+        }
+      });
     }
   }
 }

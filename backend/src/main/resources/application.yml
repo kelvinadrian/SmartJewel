@@ -19,9 +19,9 @@ spring:
     locations: classpath:db/migration
 
   jpa:
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
       ddl-auto: update
+    open-in-view: false
     show-sql: true
     properties:
       hibernate:
