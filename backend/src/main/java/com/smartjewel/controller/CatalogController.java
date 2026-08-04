@@ -29,9 +29,11 @@ public class CatalogController {
     public ResponseEntity<Page<ProductResponse>> getCatalog(
             @RequestParam(required = false) ProductType tipo,
             @RequestParam(required = false) ProductMaterial material,
+            @RequestParam(required = false) UUID categoryId,
+            @RequestParam(required = false) UUID subcategoryId,
             @PageableDefault(size = 12, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
 
-        Page<ProductResponse> response = catalogService.getCatalog(tipo, material, pageable);
+        Page<ProductResponse> response = catalogService.getCatalog(tipo, material, categoryId, subcategoryId, pageable);
         return ResponseEntity.ok(response);
     }
 

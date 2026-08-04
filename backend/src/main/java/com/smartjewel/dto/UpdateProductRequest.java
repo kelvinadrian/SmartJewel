@@ -11,6 +11,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 
 @Data
 @NoArgsConstructor
@@ -26,6 +27,8 @@ public class UpdateProductRequest {
 
     @NotNull(message = "O material do produto é obrigatório")
     private ProductMaterial material;
+
+    private UUID subcategoryId;
 
     private String imageUrl;
 

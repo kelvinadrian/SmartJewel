@@ -1,10 +1,12 @@
 package com.smartjewel.service;
 
 import com.smartjewel.domain.model.Product;
+import com.smartjewel.domain.model.Subcategory;
 import com.smartjewel.dto.CreateProductRequest;
 import com.smartjewel.dto.ProductResponse;
 import com.smartjewel.dto.UpdateProductRequest;
 import com.smartjewel.repository.ProductRepository;
+import com.smartjewel.repository.SubcategoryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +20,7 @@ import java.util.UUID;
 public class ProductService {
 
     private final ProductRepository productRepository;
+    private final SubcategoryRepository subcategoryRepository;
     private final ImageUploadService imageUploadService;
 
     @Transactional
@@ -26,11 +29,18 @@ public class ProductService {
             throw new IllegalArgumentException("Já existe um produto cadastrado com o SKU: " + request.getSku());
         }
 
+        Subcategory subcategory = null;
+        if (request.getSubcategoryId() != null) {
+            subcategory = subcategoryRepository.findById(request.getSubcategoryId())
+                    .orElseThrow(() -> new IllegalArgumentException("Subcategoria não encontrada com o ID: " + request.getSubcategoryId()));
+        }
+
         Product product = Product.builder()
                 .nome(request.getNome())
                 .sku(request.getSku())
                 .tipo(request.getTipo())
                 .material(request.getMaterial())
+                .subcategory(subcategory)
                 .quantidadeEstoque(request.getQuantidadeEstoque())
                 .imageUrl(request.getImageUrl())
                 .preco(request.getPreco())
@@ -57,9 +67,16 @@ public class ProductService {
     public ProductResponse updateProduct(UUID id, UpdateProductRequest request) {
         Product product = findEntityById(id);
 
+        Subcategory subcategory = null;
+        if (request.getSubcategoryId() != null) {
+            subcategory = subcategoryRepository.findById(request.getSubcategoryId())
+                    .orElseThrow(() -> new IllegalArgumentException("Subcategoria não encontrada com o ID: " + request.getSubcategoryId()));
+        }
+
         product.setNome(request.getNome());
         product.setTipo(request.getTipo());
         product.setMaterial(request.getMaterial());
+        product.setSubcategory(subcategory);
         product.setImageUrl(request.getImageUrl());
         product.setPreco(request.getPreco());
 
@@ -124,12 +141,22 @@ public class ProductService {
     }
 
     public ProductResponse toProductResponse(Product product) {
+        Subcategory subcategory = product.getSubcategory();
+        UUID subcategoryId = subcategory != null ? subcategory.getId() : null;
+        String subcategoryNome = subcategory != null ? subcategory.getNome() : null;
+        UUID categoryId = (subcategory != null && subcategory.getCategory() != null) ? subcategory.getCategory().getId() : null;
+        String categoryNome = (subcategory != null && subcategory.getCategory() != null) ? subcategory.getCategory().getNome() : null;
+
         return ProductResponse.builder()
                 .id(product.getId())
                 .nome(product.getNome())
                 .sku(product.getSku())
                 .tipo(product.getTipo())
                 .material(product.getMaterial())
+                .subcategoryId(subcategoryId)
+                .subcategoryNome(subcategoryNome)
+                .categoryId(categoryId)
+                .categoryNome(categoryNome)
                 .quantidadeEstoque(product.getQuantidadeEstoque())
                 .imageUrl(product.getImageUrl())
                 .preco(product.getPreco())

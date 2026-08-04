@@ -23,8 +23,12 @@ public class CatalogService {
     private final ProductService productService;
 
     @Transactional(readOnly = true)
-    public Page<ProductResponse> getCatalog(ProductType tipo, ProductMaterial material, Pageable pageable) {
-        Specification<Product> spec = ProductSpecification.filterCatalog(tipo, material, true);
+    public Page<ProductResponse> getCatalog(ProductType tipo,
+                                           ProductMaterial material,
+                                           UUID categoryId,
+                                           UUID subcategoryId,
+                                           Pageable pageable) {
+        Specification<Product> spec = ProductSpecification.filterCatalog(tipo, material, categoryId, subcategoryId, true);
         Page<Product> productsPage = productRepository.findAll(spec, pageable);
         return productsPage.map(productService::toProductResponse);
     }

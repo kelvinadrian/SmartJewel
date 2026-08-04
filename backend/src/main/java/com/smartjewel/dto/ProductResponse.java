@@ -22,6 +22,10 @@ public class ProductResponse {
     private String sku;
     private ProductType tipo;
     private ProductMaterial material;
+    private UUID subcategoryId;
+    private String subcategoryNome;
+    private UUID categoryId;
+    private String categoryNome;
     private Integer quantidadeEstoque;
     private String imageUrl;
     private BigDecimal preco;

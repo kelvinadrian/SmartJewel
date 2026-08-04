@@ -5,13 +5,13 @@ import com.smartjewel.domain.model.ProductType;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 
 @Data
 @NoArgsConstructor
@@ -30,6 +30,8 @@ public class CreateProductRequest {
 
     @NotNull(message = "O material do produto é obrigatório")
     private ProductMaterial material;
+
+    private UUID subcategoryId;
 
     @NotNull(message = "A quantidade inicial em estoque é obrigatória")
     @Min(value = 0, message = "A quantidade em estoque não pode ser negativa")
