@@ -24,72 +24,72 @@ CREATE TABLE IF NOT EXISTS material_colors (
 
 -- 3. Carga inicial de product_types (Tipos de semijoias)
 INSERT INTO product_types (id, nome, descricao, created_at, created_by)
-SELECT 'a1000000-0000-0000-0000-000000000001', 'Anel', 'Anéis solitários, alianças e aparadores', CURRENT_TIMESTAMP, 'SYSTEM'
+SELECT gen_random_uuid(), 'Anel', 'Anéis solitários, alianças e aparadores', CURRENT_TIMESTAMP, 'SYSTEM'
 WHERE NOT EXISTS (SELECT 1 FROM product_types WHERE nome = 'Anel');
 
 INSERT INTO product_types (id, nome, descricao, created_at, created_by)
-SELECT 'a1000000-0000-0000-0000-000000000002', 'Brinco', 'Argolas, ear cuffs e brincos finos', CURRENT_TIMESTAMP, 'SYSTEM'
+SELECT gen_random_uuid(), 'Brinco', 'Argolas, ear cuffs e brincos finos', CURRENT_TIMESTAMP, 'SYSTEM'
 WHERE NOT EXISTS (SELECT 1 FROM product_types WHERE nome = 'Brinco');
 
 INSERT INTO product_types (id, nome, descricao, created_at, created_by)
-SELECT 'a1000000-0000-0000-0000-000000000003', 'Bracelete', 'Braceletes rígidos e articulados', CURRENT_TIMESTAMP, 'SYSTEM'
+SELECT gen_random_uuid(), 'Bracelete', 'Braceletes rígidos e articulados', CURRENT_TIMESTAMP, 'SYSTEM'
 WHERE NOT EXISTS (SELECT 1 FROM product_types WHERE nome = 'Bracelete');
 
 INSERT INTO product_types (id, nome, descricao, created_at, created_by)
-SELECT 'a1000000-0000-0000-0000-000000000004', 'Berloques', 'Berloques e pingentes para pulseiras', CURRENT_TIMESTAMP, 'SYSTEM'
+SELECT gen_random_uuid(), 'Berloques', 'Berloques e pingentes para pulseiras', CURRENT_TIMESTAMP, 'SYSTEM'
 WHERE NOT EXISTS (SELECT 1 FROM product_types WHERE nome = 'Berloques');
 
 INSERT INTO product_types (id, nome, descricao, created_at, created_by)
-SELECT 'a1000000-0000-0000-0000-000000000005', 'Acessórios de cabelo', 'Tiaras, presilhas e grampos de luxo', CURRENT_TIMESTAMP, 'SYSTEM'
+SELECT gen_random_uuid(), 'Acessórios de cabelo', 'Tiaras, presilhas e grampos de luxo', CURRENT_TIMESTAMP, 'SYSTEM'
 WHERE NOT EXISTS (SELECT 1 FROM product_types WHERE nome = 'Acessórios de cabelo');
 
 INSERT INTO product_types (id, nome, descricao, created_at, created_by)
-SELECT 'a1000000-0000-0000-0000-000000000006', 'Colar', 'Chokers, gargantilhas e colares finos', CURRENT_TIMESTAMP, 'SYSTEM'
+SELECT gen_random_uuid(), 'Colar', 'Chokers, gargantilhas e colares finos', CURRENT_TIMESTAMP, 'SYSTEM'
 WHERE NOT EXISTS (SELECT 1 FROM product_types WHERE nome = 'Colar');
 
 INSERT INTO product_types (id, nome, descricao, created_at, created_by)
-SELECT 'a1000000-0000-0000-0000-000000000007', 'Pulseira', 'Pulseiras de elo, rivieras e correntes', CURRENT_TIMESTAMP, 'SYSTEM'
+SELECT gen_random_uuid(), 'Pulseira', 'Pulseiras de elo, rivieras e correntes', CURRENT_TIMESTAMP, 'SYSTEM'
 WHERE NOT EXISTS (SELECT 1 FROM product_types WHERE nome = 'Pulseira');
 
 INSERT INTO product_types (id, nome, descricao, created_at, created_by)
-SELECT 'a1000000-0000-0000-0000-000000000008', 'Conjuntos', 'Conjuntos coordenados de colar e brinco', CURRENT_TIMESTAMP, 'SYSTEM'
+SELECT gen_random_uuid(), 'Conjuntos', 'Conjuntos coordenados de colar e brinco', CURRENT_TIMESTAMP, 'SYSTEM'
 WHERE NOT EXISTS (SELECT 1 FROM product_types WHERE nome = 'Conjuntos');
 
 INSERT INTO product_types (id, nome, descricao, created_at, created_by)
-SELECT 'a1000000-0000-0000-0000-000000000009', 'Escapulario', 'Escapulários de proteção em ouro e prata', CURRENT_TIMESTAMP, 'SYSTEM'
+SELECT gen_random_uuid(), 'Escapulario', 'Escapulários de proteção em ouro e prata', CURRENT_TIMESTAMP, 'SYSTEM'
 WHERE NOT EXISTS (SELECT 1 FROM product_types WHERE nome = 'Escapulario');
 
 -- 4. Carga inicial de material_colors (Materiais e Cores)
 INSERT INTO material_colors (id, nome, descricao, created_at, created_by)
-SELECT 'b1000000-0000-0000-0000-000000000001', 'Banhado a Ouro', 'Ouro 18k banhado com alta durabilidade', CURRENT_TIMESTAMP, 'SYSTEM'
+SELECT gen_random_uuid(), 'Banhado a Ouro', 'Ouro 18k banhado com alta durabilidade', CURRENT_TIMESTAMP, 'SYSTEM'
 WHERE NOT EXISTS (SELECT 1 FROM material_colors WHERE nome = 'Banhado a Ouro');
 
 INSERT INTO material_colors (id, nome, descricao, created_at, created_by)
-SELECT 'b1000000-0000-0000-0000-000000000002', 'Prata 925', 'Prata 925 maciça de alta joalheria', CURRENT_TIMESTAMP, 'SYSTEM'
+SELECT gen_random_uuid(), 'Prata 925', 'Prata 925 maciça de alta joalheria', CURRENT_TIMESTAMP, 'SYSTEM'
 WHERE NOT EXISTS (SELECT 1 FROM material_colors WHERE nome = 'Prata 925');
 
 INSERT INTO material_colors (id, nome, descricao, created_at, created_by)
-SELECT 'b1000000-0000-0000-0000-000000000003', 'Prata', 'Acabamento prateado brilhante', CURRENT_TIMESTAMP, 'SYSTEM'
+SELECT gen_random_uuid(), 'Prata', 'Acabamento prateado brilhante', CURRENT_TIMESTAMP, 'SYSTEM'
 WHERE NOT EXISTS (SELECT 1 FROM material_colors WHERE nome = 'Prata');
 
 INSERT INTO material_colors (id, nome, descricao, created_at, created_by)
-SELECT 'b1000000-0000-0000-0000-000000000004', 'Dourado', 'Acabamento dourado radiante', CURRENT_TIMESTAMP, 'SYSTEM'
+SELECT gen_random_uuid(), 'Dourado', 'Acabamento dourado radiante', CURRENT_TIMESTAMP, 'SYSTEM'
 WHERE NOT EXISTS (SELECT 1 FROM material_colors WHERE nome = 'Dourado');
 
 INSERT INTO material_colors (id, nome, descricao, created_at, created_by)
-SELECT 'b1000000-0000-0000-0000-000000000005', 'Banhado a Prata', 'Banho de prata esterlina', CURRENT_TIMESTAMP, 'SYSTEM'
+SELECT gen_random_uuid(), 'Banhado a Prata', 'Banho de prata esterlina', CURRENT_TIMESTAMP, 'SYSTEM'
 WHERE NOT EXISTS (SELECT 1 FROM material_colors WHERE nome = 'Banhado a Prata');
 
 INSERT INTO material_colors (id, nome, descricao, created_at, created_by)
-SELECT 'b1000000-0000-0000-0000-000000000006', 'Ouro 18k', 'Ouro 18k de teor nobre', CURRENT_TIMESTAMP, 'SYSTEM'
+SELECT gen_random_uuid(), 'Ouro 18k', 'Ouro 18k de teor nobre', CURRENT_TIMESTAMP, 'SYSTEM'
 WHERE NOT EXISTS (SELECT 1 FROM material_colors WHERE nome = 'Ouro 18k');
 
 INSERT INTO material_colors (id, nome, descricao, created_at, created_by)
-SELECT 'b1000000-0000-0000-0000-000000000007', 'Rhodium', 'Banho de ródio branco protetor', CURRENT_TIMESTAMP, 'SYSTEM'
+SELECT gen_random_uuid(), 'Rhodium', 'Banho de ródio branco protetor', CURRENT_TIMESTAMP, 'SYSTEM'
 WHERE NOT EXISTS (SELECT 1 FROM material_colors WHERE nome = 'Rhodium');
 
 INSERT INTO material_colors (id, nome, descricao, created_at, created_by)
-SELECT 'b1000000-0000-0000-0000-000000000008', 'Rhodium Negro', 'Ródio negro sofisticado', CURRENT_TIMESTAMP, 'SYSTEM'
+SELECT gen_random_uuid(), 'Rhodium Negro', 'Ródio negro sofisticado', CURRENT_TIMESTAMP, 'SYSTEM'
 WHERE NOT EXISTS (SELECT 1 FROM material_colors WHERE nome = 'Rhodium Negro');
 
 -- 5. Atualização da tabela categories (adicionando product_type_id)
