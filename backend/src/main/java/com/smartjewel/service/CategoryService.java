@@ -43,11 +43,12 @@ public class CategoryService {
 
     @Transactional
     public CategoryResponse createCategory(CreateCategoryRequest request) {
-        ProductType productType = null;
-        if (request.getProductTypeId() != null) {
-            productType = productTypeRepository.findById(request.getProductTypeId())
-                    .orElseThrow(() -> new IllegalArgumentException("Tipo de produto não encontrado com o ID: " + request.getProductTypeId()));
+        if (request.getProductTypeId() == null) {
+            throw new IllegalArgumentException("O ID do tipo de produto é obrigatório para cadastrar uma categoria");
         }
+
+        ProductType productType = productTypeRepository.findById(request.getProductTypeId())
+                .orElseThrow(() -> new IllegalArgumentException("Tipo de produto não encontrado com o ID: " + request.getProductTypeId()));
 
         Category category = Category.builder()
                 .nome(request.getNome())
@@ -64,11 +65,12 @@ public class CategoryService {
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Categoria não encontrada com o ID: " + id));
 
-        ProductType productType = null;
-        if (request.getProductTypeId() != null) {
-            productType = productTypeRepository.findById(request.getProductTypeId())
-                    .orElseThrow(() -> new IllegalArgumentException("Tipo de produto não encontrado com o ID: " + request.getProductTypeId()));
+        if (request.getProductTypeId() == null) {
+            throw new IllegalArgumentException("O ID do tipo de produto é obrigatório para atualizar uma categoria");
         }
+
+        ProductType productType = productTypeRepository.findById(request.getProductTypeId())
+                .orElseThrow(() -> new IllegalArgumentException("Tipo de produto não encontrado com o ID: " + request.getProductTypeId()));
 
         category.setNome(request.getNome());
         category.setDescricao(request.getDescricao());

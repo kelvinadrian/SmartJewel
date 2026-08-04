@@ -1,6 +1,7 @@
 package com.smartjewel.service;
 
 import com.smartjewel.domain.model.MaterialColor;
+import com.smartjewel.dto.CreateMaterialColorRequest;
 import com.smartjewel.dto.MaterialColorResponse;
 import com.smartjewel.repository.MaterialColorRepository;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +29,45 @@ public class MaterialColorService {
         MaterialColor materialColor = materialColorRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Material/Cor não encontrado com o ID: " + id));
         return toMaterialColorResponse(materialColor);
+    }
+
+    @Transactional
+    public MaterialColorResponse createMaterialColor(CreateMaterialColorRequest request) {
+        if (materialColorRepository.existsByNomeIgnoreCase(request.getNome())) {
+            throw new IllegalArgumentException("Já existe um material/cor com o nome: " + request.getNome());
+        }
+
+        MaterialColor materialColor = MaterialColor.builder()
+                .nome(request.getNome())
+                .descricao(request.getDescricao())
+                .build();
+
+        MaterialColor savedMaterialColor = materialColorRepository.save(materialColor);
+        return toMaterialColorResponse(savedMaterialColor);
+    }
+
+    @Transactional
+    public MaterialColorResponse updateMaterialColor(UUID id, CreateMaterialColorRequest request) {
+        MaterialColor materialColor = materialColorRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Material/Cor não encontrado com o ID: " + id));
+
+        if (!materialColor.getNome().equalsIgnoreCase(request.getNome()) &&
+                materialColorRepository.existsByNomeIgnoreCase(request.getNome())) {
+            throw new IllegalArgumentException("Já existe um material/cor com o nome: " + request.getNome());
+        }
+
+        materialColor.setNome(request.getNome());
+        materialColor.setDescricao(request.getDescricao());
+
+        MaterialColor updatedMaterialColor = materialColorRepository.save(materialColor);
+        return toMaterialColorResponse(updatedMaterialColor);
+    }
+
+    @Transactional
+    public void deleteMaterialColor(UUID id) {
+        MaterialColor materialColor = materialColorRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Material/Cor não encontrado com o ID: " + id));
+        materialColorRepository.delete(materialColor);
     }
 
     public MaterialColorResponse toMaterialColorResponse(MaterialColor materialColor) {

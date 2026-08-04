@@ -14,6 +14,7 @@ import com.smartjewel.repository.ProductTypeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.UUID;
@@ -34,23 +35,24 @@ public class ProductService {
             throw new IllegalArgumentException("Já existe um produto cadastrado com o SKU: " + request.getSku());
         }
 
-        ProductType productType = null;
-        if (request.getProductTypeId() != null) {
-            productType = productTypeRepository.findById(request.getProductTypeId())
-                    .orElseThrow(() -> new IllegalArgumentException("Tipo de produto não encontrado com o ID: " + request.getProductTypeId()));
+        if (request.getProductTypeId() == null) {
+            throw new IllegalArgumentException("O ID do tipo de produto é obrigatório");
+        }
+        if (request.getCategoryId() == null) {
+            throw new IllegalArgumentException("O ID da categoria é obrigatório");
+        }
+        if (request.getMaterialColorId() == null) {
+            throw new IllegalArgumentException("O ID do material/cor é obrigatório");
         }
 
-        Category category = null;
-        if (request.getCategoryId() != null) {
-            category = categoryRepository.findById(request.getCategoryId())
-                    .orElseThrow(() -> new IllegalArgumentException("Categoria não encontrada com o ID: " + request.getCategoryId()));
-        }
+        ProductType productType = productTypeRepository.findById(request.getProductTypeId())
+                .orElseThrow(() -> new IllegalArgumentException("Tipo de produto não encontrado com o ID: " + request.getProductTypeId()));
 
-        MaterialColor materialColor = null;
-        if (request.getMaterialColorId() != null) {
-            materialColor = materialColorRepository.findById(request.getMaterialColorId())
-                    .orElseThrow(() -> new IllegalArgumentException("Material/Cor não encontrado com o ID: " + request.getMaterialColorId()));
-        }
+        Category category = categoryRepository.findById(request.getCategoryId())
+                .orElseThrow(() -> new IllegalArgumentException("Categoria não encontrada com o ID: " + request.getCategoryId()));
+
+        MaterialColor materialColor = materialColorRepository.findById(request.getMaterialColorId())
+                .orElseThrow(() -> new IllegalArgumentException("Material/Cor não encontrado com o ID: " + request.getMaterialColorId()));
 
         Product product = Product.builder()
                 .nome(request.getNome())
@@ -86,23 +88,24 @@ public class ProductService {
     public ProductResponse updateProduct(UUID id, UpdateProductRequest request) {
         Product product = findEntityById(id);
 
-        ProductType productType = null;
-        if (request.getProductTypeId() != null) {
-            productType = productTypeRepository.findById(request.getProductTypeId())
-                    .orElseThrow(() -> new IllegalArgumentException("Tipo de produto não encontrado com o ID: " + request.getProductTypeId()));
+        if (request.getProductTypeId() == null) {
+            throw new IllegalArgumentException("O ID do tipo de produto é obrigatório");
+        }
+        if (request.getCategoryId() == null) {
+            throw new IllegalArgumentException("O ID da categoria é obrigatório");
+        }
+        if (request.getMaterialColorId() == null) {
+            throw new IllegalArgumentException("O ID do material/cor é obrigatório");
         }
 
-        Category category = null;
-        if (request.getCategoryId() != null) {
-            category = categoryRepository.findById(request.getCategoryId())
-                    .orElseThrow(() -> new IllegalArgumentException("Categoria não encontrada com o ID: " + request.getCategoryId()));
-        }
+        ProductType productType = productTypeRepository.findById(request.getProductTypeId())
+                .orElseThrow(() -> new IllegalArgumentException("Tipo de produto não encontrado com o ID: " + request.getProductTypeId()));
 
-        MaterialColor materialColor = null;
-        if (request.getMaterialColorId() != null) {
-            materialColor = materialColorRepository.findById(request.getMaterialColorId())
-                    .orElseThrow(() -> new IllegalArgumentException("Material/Cor não encontrado com o ID: " + request.getMaterialColorId()));
-        }
+        Category category = categoryRepository.findById(request.getCategoryId())
+                .orElseThrow(() -> new IllegalArgumentException("Categoria não encontrada com o ID: " + request.getCategoryId()));
+
+        MaterialColor materialColor = materialColorRepository.findById(request.getMaterialColorId())
+                .orElseThrow(() -> new IllegalArgumentException("Material/Cor não encontrado com o ID: " + request.getMaterialColorId()));
 
         product.setNome(request.getNome());
         product.setProductType(productType);
@@ -154,7 +157,7 @@ public class ProductService {
     }
 
     @Transactional
-    public ProductResponse uploadProductImage(UUID id, org.springframework.web.multipart.MultipartFile file) {
+    public ProductResponse uploadProductImage(UUID id, MultipartFile file) {
         Product product = findEntityById(id);
         String imageUrl = imageUploadService.uploadImage(file);
         product.setImageUrl(imageUrl);

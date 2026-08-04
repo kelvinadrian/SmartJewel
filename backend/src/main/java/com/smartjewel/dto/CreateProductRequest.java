@@ -23,8 +23,13 @@ public class CreateProductRequest {
     @NotBlank(message = "O SKU é obrigatório")
     private String sku;
 
+    @NotNull(message = "O ID do tipo de produto é obrigatório")
     private UUID productTypeId;
+
+    @NotNull(message = "O ID da categoria é obrigatório")
     private UUID categoryId;
+
+    @NotNull(message = "O ID do material/cor é obrigatório")
     private UUID materialColorId;
 
     @NotNull(message = "A quantidade inicial em estoque é obrigatória")

@@ -1,25 +1,19 @@
 package com.smartjewel.dto;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.UUID;
-
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CreateCategoryRequest {
+public class CreateMaterialColorRequest {
 
-    @NotBlank(message = "O nome da categoria é obrigatório")
+    @NotBlank(message = "O nome do material/cor é obrigatório")
     private String nome;
 
     private String descricao;
-
-    @NotNull(message = "O ID do tipo de produto é obrigatório")
-    private UUID productTypeId;
 }

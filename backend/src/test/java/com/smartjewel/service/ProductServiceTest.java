@@ -1,6 +1,9 @@
 package com.smartjewel.service;
 
+import com.smartjewel.domain.model.Category;
+import com.smartjewel.domain.model.MaterialColor;
 import com.smartjewel.domain.model.Product;
+import com.smartjewel.domain.model.ProductType;
 import com.smartjewel.dto.CreateProductRequest;
 import com.smartjewel.dto.ProductResponse;
 import com.smartjewel.repository.CategoryRepository;
@@ -47,10 +50,17 @@ class ProductServiceTest {
 
     private Product sampleProduct;
     private UUID productId;
+    private UUID productTypeId;
+    private UUID categoryId;
+    private UUID materialColorId;
 
     @BeforeEach
     void setUp() {
         productId = UUID.randomUUID();
+        productTypeId = UUID.randomUUID();
+        categoryId = UUID.randomUUID();
+        materialColorId = UUID.randomUUID();
+
         sampleProduct = Product.builder()
                 .id(productId)
                 .nome("Anel Solitário Prata")
@@ -108,11 +118,18 @@ class ProductServiceTest {
         CreateProductRequest request = CreateProductRequest.builder()
                 .nome("Colar Coração Banhado a Ouro")
                 .sku("COLAR-002")
+                .productTypeId(productTypeId)
+                .categoryId(categoryId)
+                .materialColorId(materialColorId)
                 .quantidadeEstoque(20)
                 .preco(new BigDecimal("220.00"))
                 .build();
 
         when(productRepository.existsBySku("COLAR-002")).thenReturn(false);
+        when(productTypeRepository.findById(productTypeId)).thenReturn(Optional.of(ProductType.builder().id(productTypeId).nome("Colar").build()));
+        when(categoryRepository.findById(categoryId)).thenReturn(Optional.of(Category.builder().id(categoryId).nome("Gargantilha").build()));
+        when(materialColorRepository.findById(materialColorId)).thenReturn(Optional.of(MaterialColor.builder().id(materialColorId).nome("Banhado a Ouro").build()));
+
         when(productRepository.save(any(Product.class))).thenAnswer(invocation -> {
             Product p = invocation.getArgument(0);
             p.setId(UUID.randomUUID());
@@ -133,6 +150,9 @@ class ProductServiceTest {
         CreateProductRequest request = CreateProductRequest.builder()
                 .nome("Brinco Argola")
                 .sku("ANEL-001")
+                .productTypeId(productTypeId)
+                .categoryId(categoryId)
+                .materialColorId(materialColorId)
                 .quantidadeEstoque(5)
                 .preco(new BigDecimal("90.00"))
                 .build();

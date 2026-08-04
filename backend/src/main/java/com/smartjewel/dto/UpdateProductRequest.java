@@ -20,8 +20,13 @@ public class UpdateProductRequest {
     @NotBlank(message = "O nome do produto é obrigatório")
     private String nome;
 
+    @NotNull(message = "O ID do tipo de produto é obrigatório")
     private UUID productTypeId;
+
+    @NotNull(message = "O ID da categoria é obrigatório")
     private UUID categoryId;
+
+    @NotNull(message = "O ID do material/cor é obrigatório")
     private UUID materialColorId;
 
     private String imageUrl;
