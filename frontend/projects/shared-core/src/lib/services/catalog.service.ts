@@ -15,6 +15,8 @@ export class CatalogService {
   getCatalog(
     tipo?: ProductType | null,
     material?: ProductMaterial | null,
+    categoryId?: string | null,
+    subcategoryId?: string | null,
     page: number = 0,
     size: number = 12
   ): Observable<Page<Product>> {
@@ -28,6 +30,12 @@ export class CatalogService {
     }
     if (material) {
       params = params.set('material', material);
+    }
+    if (categoryId) {
+      params = params.set('categoryId', categoryId);
+    }
+    if (subcategoryId) {
+      params = params.set('subcategoryId', subcategoryId);
     }
 
     return this.http.get<Page<Product>>(this.apiUrl, { params });

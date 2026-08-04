@@ -23,6 +23,10 @@ export interface Product {
   sku: string;
   tipo: ProductType;
   material: ProductMaterial;
+  subcategoryId?: string;
+  subcategoryNome?: string;
+  categoryId?: string;
+  categoryNome?: string;
   quantidadeEstoque: number;
   imageUrl?: string;
   preco: number;
@@ -37,6 +41,7 @@ export interface CreateProductRequest {
   sku: string;
   tipo: ProductType;
   material: ProductMaterial;
+  subcategoryId?: string;
   quantidadeEstoque: number;
   preco: number;
   imageUrl?: string;
@@ -46,6 +51,7 @@ export interface UpdateProductRequest {
   nome: string;
   tipo: ProductType;
   material: ProductMaterial;
+  subcategoryId?: string;
   preco: number;
   imageUrl?: string;
 }
