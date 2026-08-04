@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { API_URL } from '../config/api.config';
 import { MaterialColor, CreateMaterialColorRequest } from '../models/material-color.model';
 
 @Injectable({
@@ -8,8 +9,8 @@ import { MaterialColor, CreateMaterialColorRequest } from '../models/material-co
 })
 export class MaterialColorService {
   private http = inject(HttpClient);
-  private publicUrl = '/api/v1/material-colors';
-  private adminUrl = '/api/v1/admin/material-colors';
+  private publicUrl = `${API_URL}/material-colors`;
+  private adminUrl = `${API_URL}/admin/material-colors`;
 
   getMaterialColors(): Observable<MaterialColor[]> {
     return this.http.get<MaterialColor[]>(this.publicUrl);

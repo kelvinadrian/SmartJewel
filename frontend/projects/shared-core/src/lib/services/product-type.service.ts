@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { API_URL } from '../config/api.config';
 import { ProductType, CreateProductTypeRequest } from '../models/product-type.model';
 
 @Injectable({
@@ -8,8 +9,8 @@ import { ProductType, CreateProductTypeRequest } from '../models/product-type.mo
 })
 export class ProductTypeService {
   private http = inject(HttpClient);
-  private publicUrl = '/api/v1/product-types';
-  private adminUrl = '/api/v1/admin/product-types';
+  private publicUrl = `${API_URL}/product-types`;
+  private adminUrl = `${API_URL}/admin/product-types`;
 
   getProductTypes(): Observable<ProductType[]> {
     return this.http.get<ProductType[]>(this.publicUrl);
