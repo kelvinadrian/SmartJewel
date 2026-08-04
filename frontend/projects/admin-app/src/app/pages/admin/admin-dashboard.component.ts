@@ -11,10 +11,13 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
+import { MatSidenavModule } from '@angular/material/sidenav';
+import { MatListModule } from '@angular/material/list';
 import { ProductService, Product } from '@shared-core';
 import { ProductFormDialogComponent } from './components/product-form-dialog/product-form-dialog.component';
 import { StockDialogComponent } from './components/stock-dialog/stock-dialog.component';
 import { InventoryImportDialogComponent } from './components/inventory-import-dialog/inventory-import-dialog.component';
+import { CategoryListComponent } from './components/category-list/category-list.component';
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -31,184 +34,239 @@ import { InventoryImportDialogComponent } from './components/inventory-import-di
     MatDialogModule,
     MatSnackBarModule,
     MatTooltipModule,
-    MatButtonToggleModule
+    MatButtonToggleModule,
+    MatSidenavModule,
+    MatListModule,
+    CategoryListComponent
   ],
   template: `
-    <div class="admin-container">
-      <header class="admin-header">
-        <div>
-          <h1 class="gold-text">Painel Administrativo</h1>
-          <p>Gestão de semijoias, fotos e estoque de alta joalheria</p>
+    <mat-sidenav-container class="admin-sidenav-container">
+      <!-- MENU LATERAL ESQUERDO DO PAINEL ADMINISTRATIVO -->
+      <mat-sidenav mode="side" opened class="admin-sidebar">
+        <div class="sidebar-brand">
+          <mat-icon class="brand-icon">diamond</mat-icon>
+          <h2>SmartJewel</h2>
+          <span class="brand-subtitle">Painel Admin</span>
         </div>
 
-        <div class="header-actions">
-          <button mat-stroked-button class="import-btn" (click)="openImportDialog()">
-            <mat-icon>file_upload</mat-icon>
-            <span>Importar Estoque</span>
-          </button>
+        <mat-nav-list class="sidebar-nav-list">
+          <a
+            mat-list-item
+            [class.active-nav-item]="activeTab === 'products'"
+            (click)="activeTab = 'products'"
+          >
+            <mat-icon matListItemIcon class="nav-item-icon">inventory_2</mat-icon>
+            <span matListItemTitle>Produtos</span>
+          </a>
 
-          <button mat-raised-button color="primary" class="add-btn" (click)="openCreateDialog()">
-            <mat-icon>add</mat-icon>
-            <span>Novo Produto</span>
-          </button>
-        </div>
-      </header>
+          <a
+            mat-list-item
+            [class.active-nav-item]="activeTab === 'categories'"
+            (click)="activeTab = 'categories'"
+          >
+            <mat-icon matListItemIcon class="nav-item-icon">category</mat-icon>
+            <span matListItemTitle>Categorias</span>
+          </a>
+        </mat-nav-list>
+      </mat-sidenav>
 
-      <div class="toolbar-section glass-card">
-        <mat-form-field appearance="outline" class="search-field">
-          <mat-label>Buscar Produto por Nome, SKU, Tipo ou Material...</mat-label>
-          <input matInput (keyup)="applyFilter($event)" placeholder="Ex: Anel Solitário, SKU-001..." #input />
-          <mat-icon matPrefix color="primary">search</mat-icon>
-        </mat-form-field>
+      <!-- CONTEÚDO PRINCIPAL DO DASHBOARD -->
+      <mat-sidenav-content class="admin-main-content">
+        <div class="admin-container">
+          @if (activeTab === 'products') {
+            <header class="admin-header">
+              <div>
+                <h1 class="gold-text">Painel Administrativo</h1>
+                <p>Gestão de semijoias, fotos e estoque de alta joalheria</p>
+              </div>
 
-        <mat-button-toggle-group [value]="viewMode" (change)="viewMode = $event.value" class="view-toggle">
-          <mat-button-toggle value="table" matTooltip="Modo Tabela">
-            <mat-icon>view_list</mat-icon>
-          </mat-button-toggle>
-          <mat-button-toggle value="grid" matTooltip="Modo Cards (Catálogo com Foto Ampliada)">
-            <mat-icon>grid_view</mat-icon>
-          </mat-button-toggle>
-        </mat-button-toggle-group>
-      </div>
-
-      <!-- MODO 1: TABELA -->
-      @if (viewMode === 'table') {
-        <div class="table-container glass-card">
-          <table mat-table [dataSource]="dataSource" matSort class="full-width-table">
-            <ng-container matColumnDef="imageUrl">
-              <th mat-header-cell *matHeaderCellDef>Foto</th>
-              <td mat-cell *matCellDef="let element">
-                @if (element.imageUrl && !imageErrors[element.id]) {
-                  <img [src]="element.imageUrl" (error)="onImageError(element.id)" alt="Foto" class="product-thumb" />
-                } @else {
-                  <div class="thumb-placeholder" matTooltip="Sem Imagem"><mat-icon>diamond</mat-icon></div>
-                }
-              </td>
-            </ng-container>
-
-            <ng-container matColumnDef="sku">
-              <th mat-header-cell *matHeaderCellDef mat-sort-header>SKU</th>
-              <td mat-cell *matCellDef="let element" class="sku-cell">{{ element.sku }}</td>
-            </ng-container>
-
-            <ng-container matColumnDef="nome">
-              <th mat-header-cell *matHeaderCellDef mat-sort-header>Nome</th>
-              <td mat-cell *matCellDef="let element" class="name-cell">{{ element.nome }}</td>
-            </ng-container>
-
-            <ng-container matColumnDef="tipo">
-              <th mat-header-cell *matHeaderCellDef mat-sort-header>Tipo</th>
-              <td mat-cell *matCellDef="let element">
-                <span class="badge badge-tipo">{{ element.tipo }}</span>
-              </td>
-            </ng-container>
-
-            <ng-container matColumnDef="material">
-              <th mat-header-cell *matHeaderCellDef mat-sort-header>Material</th>
-              <td mat-cell *matCellDef="let element">
-                <span class="badge badge-material">{{ element.material }}</span>
-              </td>
-            </ng-container>
-
-            <ng-container matColumnDef="preco">
-              <th mat-header-cell *matHeaderCellDef mat-sort-header>Preço</th>
-              <td mat-cell *matCellDef="let element" class="price-cell">
-                {{ element.preco | currency:'BRL':'symbol':'1.2-2' }}
-              </td>
-            </ng-container>
-
-            <ng-container matColumnDef="quantidadeEstoque">
-              <th mat-header-cell *matHeaderCellDef mat-sort-header>Estoque</th>
-              <td mat-cell *matCellDef="let element">
-                <span [class]="element.quantidadeEstoque > 0 ? 'stock-ok' : 'stock-zero'">
-                  {{ element.quantidadeEstoque }} un
-                </span>
-              </td>
-            </ng-container>
-
-            <ng-container matColumnDef="actions">
-              <th mat-header-cell *matHeaderCellDef>Ações</th>
-              <td mat-cell *matCellDef="let element" class="actions-cell">
-                <button mat-icon-button color="accent" matTooltip="Movimentar Estoque" (click)="openStockDialog(element)">
-                  <mat-icon>inventory_2</mat-icon>
+              <div class="header-actions">
+                <button mat-stroked-button class="import-btn" (click)="openImportDialog()">
+                  <mat-icon>file_upload</mat-icon>
+                  <span>Importar Estoque</span>
                 </button>
-                <button mat-icon-button color="primary" matTooltip="Editar Produto" (click)="openEditDialog(element)">
-                  <mat-icon>edit</mat-icon>
-                </button>
-                <button mat-icon-button color="warn" matTooltip="Excluir Produto" (click)="deleteProduct(element)">
-                  <mat-icon>delete</mat-icon>
-                </button>
-              </td>
-            </ng-container>
 
-            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-            <tr class="mat-row" *matNoDataRow>
-              <td class="mat-cell no-data-cell" colspan="8">
-                Nenhum produto encontrado.
-              </td>
-            </tr>
-          </table>
-          <mat-paginator [pageSizeOptions]="[5, 10, 25, 50]" showFirstLastButtons></mat-paginator>
-        </div>
-      }
+                <button mat-raised-button color="primary" class="add-btn" (click)="openCreateDialog()">
+                  <mat-icon>add</mat-icon>
+                  <span>Novo Produto</span>
+                </button>
+              </div>
+            </header>
 
-      <!-- MODO 2: GRID / CARDS (ESTILO CATÁLOGO COM FOTO AMPLIADA) -->
-      @if (viewMode === 'grid') {
-        <div class="cards-grid">
-          @for (product of filteredProducts; track product.id) {
-            <div class="product-card glass-card">
-              <div class="card-image-container">
-                @if (product.imageUrl && !imageErrors[product.id]) {
-                  <img [src]="product.imageUrl" (error)="onImageError(product.id)" alt="{{ product.nome }}" class="card-image" />
-                } @else {
-                  <div class="card-image-placeholder">
-                    <mat-icon class="placeholder-icon">diamond</mat-icon>
-                    <span>Sem Foto</span>
+            <div class="toolbar-section glass-card">
+              <mat-form-field appearance="outline" class="search-field">
+                <mat-label>Buscar Produto por Nome, SKU, Tipo ou Material...</mat-label>
+                <input matInput (keyup)="applyFilter($event)" placeholder="Ex: Anel Solitário, SKU-001..." #input />
+                <mat-icon matPrefix color="primary">search</mat-icon>
+              </mat-form-field>
+
+              <mat-button-toggle-group [value]="viewMode" (change)="viewMode = $event.value" class="view-toggle">
+                <mat-button-toggle value="table" matTooltip="Modo Tabela">
+                  <mat-icon>view_list</mat-icon>
+                </mat-button-toggle>
+                <mat-button-toggle value="grid" matTooltip="Modo Cards (Catálogo com Foto Ampliada)">
+                  <mat-icon>grid_view</mat-icon>
+                </mat-button-toggle>
+              </mat-button-toggle-group>
+            </div>
+
+            <!-- MODO 1: TABELA -->
+            @if (viewMode === 'table') {
+              <div class="table-container glass-card">
+                <table mat-table [dataSource]="dataSource" matSort class="full-width-table">
+                  <ng-container matColumnDef="imageUrl">
+                    <th mat-header-cell *matHeaderCellDef>Foto</th>
+                    <td mat-cell *matCellDef="let element">
+                      @if (element.imageUrl && !imageErrors[element.id]) {
+                        <img [src]="element.imageUrl" (error)="onImageError(element.id)" alt="Foto" class="product-thumb" />
+                      } @else {
+                        <div class="thumb-placeholder" matTooltip="Sem Imagem"><mat-icon>diamond</mat-icon></div>
+                      }
+                    </td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="sku">
+                    <th mat-header-cell *matHeaderCellDef mat-sort-header>SKU</th>
+                    <td mat-cell *matCellDef="let element" class="sku-cell">{{ element.sku }}</td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="nome">
+                    <th mat-header-cell *matHeaderCellDef mat-sort-header>Nome</th>
+                    <td mat-cell *matCellDef="let element" class="name-cell">{{ element.nome }}</td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="tipo">
+                    <th mat-header-cell *matHeaderCellDef mat-sort-header>Tipo</th>
+                    <td mat-cell *matCellDef="let element">
+                      <span class="badge badge-tipo">{{ element.tipo }}</span>
+                    </td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="material">
+                    <th mat-header-cell *matHeaderCellDef mat-sort-header>Material</th>
+                    <td mat-cell *matCellDef="let element">
+                      <span class="badge badge-material">{{ element.material }}</span>
+                    </td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="preco">
+                    <th mat-header-cell *matHeaderCellDef mat-sort-header>Preço</th>
+                    <td mat-cell *matCellDef="let element" class="price-cell">
+                      {{ element.preco | currency:'BRL':'symbol':'1.2-2' }}
+                    </td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="quantidadeEstoque">
+                    <th mat-header-cell *matHeaderCellDef mat-sort-header>Estoque</th>
+                    <td mat-cell *matCellDef="let element">
+                      <span [class]="element.quantidadeEstoque > 0 ? 'stock-ok' : 'stock-zero'">
+                        {{ element.quantidadeEstoque }} un
+                      </span>
+                    </td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="actions">
+                    <th mat-header-cell *matHeaderCellDef>Ações</th>
+                    <td mat-cell *matCellDef="let element" class="actions-cell">
+                      <button mat-icon-button color="accent" matTooltip="Movimentar Estoque" (click)="openStockDialog(element)">
+                        <mat-icon>inventory_2</mat-icon>
+                      </button>
+                      <button mat-icon-button color="primary" matTooltip="Editar Produto" (click)="openEditDialog(element)">
+                        <mat-icon>edit</mat-icon>
+                      </button>
+                      <button mat-icon-button color="warn" matTooltip="Excluir Produto" (click)="deleteProduct(element)">
+                        <mat-icon>delete</mat-icon>
+                      </button>
+                    </td>
+                  </ng-container>
+
+                  <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                  <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+                  <tr class="mat-row" *matNoDataRow>
+                    <td class="mat-cell no-data-cell" colspan="8">
+                      Nenhum produto encontrado.
+                    </td>
+                  </tr>
+                </table>
+                <mat-paginator [pageSizeOptions]="[5, 10, 25, 50]" showFirstLastButtons></mat-paginator>
+              </div>
+            }
+
+            <!-- MODO 2: GRID / CARDS (ESTILO CATÁLOGO COM FOTO AMPLIADA) -->
+            @if (viewMode === 'grid') {
+              <div class="cards-grid">
+                @for (product of filteredProducts; track product.id) {
+                  <div class="product-card glass-card">
+                    <div class="card-image-container">
+                      @if (product.imageUrl && !imageErrors[product.id]) {
+                        <img [src]="product.imageUrl" (error)="onImageError(product.id)" alt="{{ product.nome }}" class="card-image" />
+                      } @else {
+                        <div class="card-image-placeholder">
+                          <mat-icon class="placeholder-icon">diamond</mat-icon>
+                          <span>Sem Foto</span>
+                        </div>
+                      }
+                      <span [class]="product.quantidadeEstoque > 0 ? 'stock-badge stock-ok-badge' : 'stock-badge stock-zero-badge'">
+                        Estoque: {{ product.quantidadeEstoque }} un
+                      </span>
+                    </div>
+
+                    <div class="card-body">
+                      <div class="card-meta">
+                        <span class="sku-tag">{{ product.sku }}</span>
+                        <span class="badge badge-tipo">{{ product.tipo }}</span>
+                      </div>
+
+                      <h3 class="card-title">{{ product.nome }}</h3>
+                      <p class="material-text"><span class="badge badge-material">{{ product.material }}</span></p>
+                      <p class="card-price">{{ product.preco | currency:'BRL':'symbol':'1.2-2' }}</p>
+                    </div>
+
+                    <div class="card-actions">
+                      <button mat-stroked-button color="accent" class="action-btn" matTooltip="Movimentar Estoque" (click)="openStockDialog(product)">
+                        <mat-icon>inventory_2</mat-icon>
+                        <span>Estoque</span>
+                      </button>
+                      <button mat-stroked-button color="primary" class="action-btn" matTooltip="Editar Produto" (click)="openEditDialog(product)">
+                        <mat-icon>edit</mat-icon>
+                        <span>Editar</span>
+                      </button>
+                      <button mat-icon-button color="warn" matTooltip="Excluir Produto" (click)="deleteProduct(product)">
+                        <mat-icon>delete</mat-icon>
+                      </button>
+                    </div>
+                  </div>
+                } @empty {
+                  <div class="no-data-card glass-card">
+                    <mat-icon color="primary">info</mat-icon>
+                    <p>Nenhum produto cadastrado ou encontrado no filtro.</p>
                   </div>
                 }
-                <span [class]="product.quantidadeEstoque > 0 ? 'stock-badge stock-ok-badge' : 'stock-badge stock-zero-badge'">
-                  Estoque: {{ product.quantidadeEstoque }} un
-                </span>
               </div>
-
-              <div class="card-body">
-                <div class="card-meta">
-                  <span class="sku-tag">{{ product.sku }}</span>
-                  <span class="badge badge-tipo">{{ product.tipo }}</span>
-                </div>
-
-                <h3 class="card-title">{{ product.nome }}</h3>
-                <p class="material-text"><span class="badge badge-material">{{ product.material }}</span></p>
-                <p class="card-price">{{ product.preco | currency:'BRL':'symbol':'1.2-2' }}</p>
-              </div>
-
-              <div class="card-actions">
-                <button mat-stroked-button color="accent" class="action-btn" matTooltip="Movimentar Estoque" (click)="openStockDialog(product)">
-                  <mat-icon>inventory_2</mat-icon>
-                  <span>Estoque</span>
-                </button>
-                <button mat-stroked-button color="primary" class="action-btn" matTooltip="Editar Produto" (click)="openEditDialog(product)">
-                  <mat-icon>edit</mat-icon>
-                  <span>Editar</span>
-                </button>
-                <button mat-icon-button color="warn" matTooltip="Excluir Produto" (click)="deleteProduct(product)">
-                  <mat-icon>delete</mat-icon>
-                </button>
-              </div>
-            </div>
-          } @empty {
-            <div class="no-data-card glass-card">
-              <mat-icon color="primary">info</mat-icon>
-              <p>Nenhum produto cadastrado ou encontrado no filtro.</p>
-            </div>
+            }
+          } @else if (activeTab === 'categories') {
+            <!-- ABA DE GESTÃO DE CATEGORIAS E SUBCATEGORIAS -->
+            <app-category-list></app-category-list>
           }
         </div>
-      }
-    </div>
+      </mat-sidenav-content>
+    </mat-sidenav-container>
   `,
   styles: [`
-    .admin-container { max-width: 1200px; margin: 2rem auto; padding: 0 1rem; }
+    .admin-sidenav-container { min-height: 100vh; background: #1E2022; }
+    .admin-sidebar { width: 240px; background: #25282A; border-right: 1px solid rgba(212, 175, 55, 0.2); }
+    .sidebar-brand { padding: 1.5rem 1rem; text-align: center; border-bottom: 1px solid rgba(212, 175, 55, 0.2); }
+    .brand-icon { font-size: 2.2rem; width: 2.2rem; height: 2.2rem; color: #D4AF37; margin-bottom: 0.2rem; }
+    .sidebar-brand h2 { font-size: 1.3rem; font-weight: 700; color: #D4AF37; margin: 0; }
+    .brand-subtitle { font-size: 0.75rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; }
+
+    .sidebar-nav-list { padding-top: 1rem; }
+    .sidebar-nav-list a { height: 48px; border-radius: 8px; margin: 0.2rem 0.5rem; color: #cbd5e1 !important; transition: all 0.2s ease; cursor: pointer; }
+    .sidebar-nav-list a:hover, .sidebar-nav-list a.active-nav-item { background: rgba(212, 175, 55, 0.15) !important; color: #D4AF37 !important; font-weight: 700; }
+    .nav-item-icon { color: #D4AF37; }
+
+    .admin-main-content { padding: 1rem 1.5rem; }
+    .admin-container { max-width: 1200px; margin: 1rem auto 3rem; }
     .admin-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; }
     .gold-text { font-size: 2rem; font-weight: 700; color: #D4AF37; margin-bottom: 0.2rem; }
     .admin-header p { color: #94a3b8; }
@@ -262,6 +320,7 @@ export class AdminDashboardComponent implements OnInit, AfterViewInit {
   private snackBar = inject(MatSnackBar);
   private cdr = inject(ChangeDetectorRef);
 
+  activeTab: 'products' | 'categories' = 'products';
   viewMode: 'table' | 'grid' = 'table';
   imageErrors: Record<string, boolean> = {};
 

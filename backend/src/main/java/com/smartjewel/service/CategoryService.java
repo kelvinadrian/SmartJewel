@@ -52,6 +52,23 @@ public class CategoryService {
     }
 
     @Transactional
+    public CategoryResponse updateCategory(UUID id, CreateCategoryRequest request) {
+        Category category = categoryRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Categoria não encontrada com o ID: " + id));
+
+        if (!category.getNome().equalsIgnoreCase(request.getNome()) &&
+                categoryRepository.existsByNomeIgnoreCase(request.getNome())) {
+            throw new IllegalArgumentException("Já existe outra categoria com o nome: " + request.getNome());
+        }
+
+        category.setNome(request.getNome());
+        category.setDescricao(request.getDescricao());
+
+        Category updatedCategory = categoryRepository.save(category);
+        return toCategoryResponse(updatedCategory);
+    }
+
+    @Transactional
     public SubcategoryResponse createSubcategory(UUID categoryId, CreateSubcategoryRequest request) {
         Category category = categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new IllegalArgumentException("Categoria não encontrada com o ID: " + categoryId));
@@ -71,16 +88,36 @@ public class CategoryService {
     }
 
     @Transactional
+    public SubcategoryResponse updateSubcategory(UUID subcategoryId, CreateSubcategoryRequest request) {
+        Subcategory subcategory = subcategoryRepository.findById(subcategoryId)
+                .orElseThrow(() -> new IllegalArgumentException("Subcategoria não encontrada com o ID: " + subcategoryId));
+
+        subcategory.setNome(request.getNome());
+        subcategory.setDescricao(request.getDescricao());
+
+        Subcategory updatedSubcategory = subcategoryRepository.save(subcategory);
+        return toSubcategoryResponse(updatedSubcategory);
+    }
+
+    @Transactional
     public void deleteCategory(UUID id) {
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Categoria não encontrada com o ID: " + id));
         categoryRepository.delete(category);
     }
 
+    @Transactional
+    public void deleteSubcategory(UUID subcategoryId) {
+        Subcategory subcategory = subcategoryRepository.findById(subcategoryId)
+                .orElseThrow(() -> new IllegalArgumentException("Subcategoria não encontrada com o ID: " + subcategoryId));
+        subcategoryRepository.delete(subcategory);
+    }
+
     public CategoryResponse toCategoryResponse(Category category) {
-        List<SubcategoryResponse> subcategoryResponses = category.getSubcategories().stream()
-                .map(this::toSubcategoryResponse)
-                .toList();
+        List<SubcategoryResponse> subcategoryResponses = category.getSubcategories() != null ?
+                category.getSubcategories().stream()
+                        .map(this::toSubcategoryResponse)
+                        .toList() : List.of();
 
         return CategoryResponse.builder()
                 .id(category.getId())
