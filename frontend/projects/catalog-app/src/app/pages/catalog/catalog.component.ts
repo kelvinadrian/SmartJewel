@@ -498,11 +498,11 @@ import {
     .product-title { font-size: 1.05rem; font-weight: 700; color: #E2E2E6; margin: 0 0 0.3rem; line-height: 1.3; }
     .product-sku { font-size: 0.75rem; color: #64748B; font-family: monospace; margin-bottom: 1rem; }
     
-    /* NOVO RODAPÉ DO CARTÃO (PRODUCT-CARD-FOOTER) */
+    /* NOVO RODAPÉ DO CARTÃO (PRODUCT-CARD-FOOTER) - BOTÃO EM LINHA PRÓPRIA FULL-WIDTH */
     .product-card-footer {
       display: flex !important;
-      justify-content: space-between !important;
-      align-items: center !important;
+      flex-direction: column !important;
+      gap: 12px !important;
       padding: 16px !important;
       border-top: 1px solid #333 !important;
       margin-top: auto; /* Empurra o rodapé pro fundo do card */
@@ -523,16 +523,23 @@ import {
     }
 
     .price-value {
-      font-size: 18px !important;
+      font-size: 20px !important;
       font-weight: bold !important;
       color: #D4AF37 !important;
       line-height: 1 !important;
     }
 
     .add-button {
+      width: 100% !important;
+      height: 42px !important;
+      border-radius: 8px !important;
       background-color: #D4AF37 !important;
       color: #1A1C1E !important;
       font-weight: bold !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      gap: 8px !important;
     }
 
     /* PAGINADOR (CONTAINER SEPARADO COM MARGEM E SEM SOBREPOSIÇÃO) */
