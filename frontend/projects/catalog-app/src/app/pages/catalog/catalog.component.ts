@@ -94,10 +94,10 @@ import {
                       <a
                         mat-list-item
                         class="submenu-nav-item"
-                        [class.active-menu-item]="selectedCategoryId === cat.id"
-                        (click)="selectCategory(cat); $event.stopPropagation()"
+                        [ngClass]="{ 'active-category': selectedCategoryId === cat.id }"
+                        (click)="selectCategory(type, cat); $event.stopPropagation()"
                       >
-                        <span>{{ cat.nome }}</span>
+                        <span class="category-name-text">{{ cat.nome }}</span>
                       </a>
                     }
                   </mat-nav-list>
@@ -395,21 +395,35 @@ import {
 
     .nav-icon { color: #D4AF37; flex-shrink: 0; }
 
+    /* Destaca os itens do submenu (Categorias) e Força Quebra de Linha em Nomes Longos */
     .submenu-list {
       padding: 0.2rem 0 !important;
     }
 
-    /* Destaca os itens do submenu (Categorias) */
-    .submenu-list a {
+    .submenu-list a,
+    .submenu-list .submenu-nav-item,
+    .submenu-list .mdc-list-item__content,
+    .submenu-list .mat-mdc-list-item-title {
+      white-space: normal !important;
+      word-wrap: break-word !important;
+      line-height: 1.2 !important;
+      height: auto !important;
+      min-height: 38px !important;
+      padding: 8px 16px 8px 40px !important;
       color: #D4AF37 !important; /* Dourado */
-      padding-left: 40px !important; /* Recuo para mostrar hierarquia */
-      height: 38px !important;
       font-size: 0.85rem !important;
       font-weight: 600 !important;
       border-radius: 6px !important;
       margin-bottom: 0.2rem !important;
       transition: all 0.2s ease !important;
       cursor: pointer !important;
+      box-sizing: border-box !important;
+    }
+
+    .category-name-text {
+      white-space: normal !important;
+      word-wrap: break-word !important;
+      display: block !important;
     }
 
     .submenu-list a:hover {
@@ -417,10 +431,11 @@ import {
       color: #ffffff !important;
     }
 
-    .submenu-list a.active-menu-item {
-      background-color: rgba(212, 175, 55, 0.25) !important;
-      color: #ffffff !important;
-      font-weight: 700 !important;
+    .active-category {
+      color: #D4AF37 !important;
+      font-weight: bold !important;
+      border-left: 3px solid #D4AF37 !important;
+      background: rgba(212, 175, 55, 0.15) !important;
     }
 
     .sidebar-footer { padding: 1rem; border-top: 1px solid rgba(212, 175, 55, 0.15); font-size: 0.75rem; color: #64748B; text-align: center; }
@@ -527,6 +542,13 @@ export class CatalogComponent implements OnInit {
     this.route.queryParams.subscribe(params => {
       this.selectedCategoryId = params['categoryId'] || null;
       this.selectedProductTypeId = params['productTypeId'] || null;
+
+      if (this.selectedCategoryId && !this.selectedProductTypeId && this.categories.length > 0) {
+        const foundCat = this.categories.find(c => c.id === this.selectedCategoryId);
+        if (foundCat) {
+          this.selectedProductTypeId = foundCat.productTypeId || null;
+        }
+      }
       this.updateActiveFilterLabel();
       this.loadCatalog();
     });
@@ -589,6 +611,12 @@ export class CatalogComponent implements OnInit {
     this.categoryService.getCategories().subscribe({
       next: (cats) => {
         this.categories = cats;
+        if (this.selectedCategoryId && !this.selectedProductTypeId) {
+          const foundCat = this.categories.find(c => c.id === this.selectedCategoryId);
+          if (foundCat) {
+            this.selectedProductTypeId = foundCat.productTypeId || null;
+          }
+        }
         this.updateActiveFilterLabel();
       },
       error: () => {}
@@ -628,6 +656,7 @@ export class CatalogComponent implements OnInit {
   }
 
   selectProductType(type: ProductType): void {
+    this.selectedProductTypeId = type.id;
     this.pageIndex = 0;
     this.router.navigate([], {
       relativeTo: this.route,
@@ -636,22 +665,24 @@ export class CatalogComponent implements OnInit {
     });
   }
 
-  selectCategory(cat: Category): void {
+  selectCategory(type: ProductType, cat: Category): void {
+    this.selectedProductTypeId = type.id;
+    this.selectedCategoryId = cat.id;
     this.pageIndex = 0;
     this.router.navigate([], {
       relativeTo: this.route,
-      queryParams: { categoryId: cat.id, productTypeId: null },
+      queryParams: { categoryId: cat.id, productTypeId: type.id },
       queryParamsHandling: 'merge'
     });
   }
 
   updateActiveFilterLabel(): void {
-    if (this.selectedProductTypeId) {
-      const type = this.productTypes.find(t => t.id === this.selectedProductTypeId);
-      this.activeFilterLabel = type ? `Produto: ${type.nome}` : 'Produto Selecionado';
-    } else if (this.selectedCategoryId) {
+    if (this.selectedCategoryId) {
       const cat = this.categories.find(c => c.id === this.selectedCategoryId);
       this.activeFilterLabel = cat ? `Categoria: ${cat.nome}` : 'Categoria Selecionada';
+    } else if (this.selectedProductTypeId) {
+      const type = this.productTypes.find(t => t.id === this.selectedProductTypeId);
+      this.activeFilterLabel = type ? `Produto: ${type.nome}` : 'Produto Selecionado';
     } else {
       this.activeFilterLabel = null;
     }
