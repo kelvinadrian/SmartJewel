@@ -11,6 +11,7 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatSidenav, MatSidenavModule } from '@angular/material/sidenav';
 import { MatListModule } from '@angular/material/list';
+import { MatExpansionModule } from '@angular/material/expansion';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -41,6 +42,7 @@ import {
     MatDividerModule,
     MatSidenavModule,
     MatListModule,
+    MatExpansionModule,
     MatBadgeModule,
     MatSnackBarModule,
     MatTooltipModule
@@ -48,7 +50,7 @@ import {
   template: `
     <mat-sidenav-container class="catalog-sidenav-container">
       
-      <!-- 1. BARRA LATERAL ESQUERDA FIXA: NAVEGAÇÃO DE PRODUTOS COM PURE CSS FLYOUT MENU NO HOVER (START / SIDE / OPENED) -->
+      <!-- 1. BARRA LATERAL ESQUERDA FIXA: NAVEGAÇÃO DE PRODUTOS COM ACCORDION MAT-EXPANSION-PANEL (START / SIDE / OPENED) -->
       <mat-sidenav #leftSidenav position="start" mode="side" opened class="left-nav-sidenav">
         <div class="sidebar-brand-header">
           <mat-icon class="gold-icon">diamond</mat-icon>
@@ -56,69 +58,52 @@ import {
         </div>
 
         <div class="sidebar-scroll-content">
-          <!-- SEÇÃO: PRODUTOS (TIPOS DE PRODUTOS COM PURE CSS FLYOUT MENU NO HOVER) -->
+          <!-- SEÇÃO: PRODUTOS (ACCORDION MAT-EXPANSION-PANEL DE TIPOS E CATEGORIAS) -->
           <div class="nav-section">
             <span class="section-title">PRODUTOS</span>
             
             <mat-nav-list class="sidebar-nav-list">
-              <div class="sidebar-item-container">
-                <a
-                  mat-list-item
-                  class="sidebar-main-item"
-                  [class.active-btn]="!selectedProductTypeId && !selectedCategoryId"
-                  (click)="resetFilters()"
-                >
-                  <div class="menu-item-wrapper">
-                    <div class="menu-item-left">
-                      <mat-icon class="nav-icon">auto_awesome</mat-icon>
-                      <span>Todas as Peças</span>
-                    </div>
-                  </div>
-                </a>
-              </div>
+              <a
+                mat-list-item
+                class="sidebar-main-item"
+                [class.active-btn]="!selectedProductTypeId && !selectedCategoryId"
+                (click)="resetFilters()"
+              >
+                <div class="menu-item-left">
+                  <mat-icon class="nav-icon">auto_awesome</mat-icon>
+                  <span>Todas as Peças</span>
+                </div>
+              </a>
+            </mat-nav-list>
 
+            <mat-accordion class="sidebar-accordion" multi="false">
               @for (type of productTypes; track type.id) {
-                <div class="sidebar-item-container">
-                  <!-- Item Principal -->
-                  <a
-                    mat-list-item
-                    class="sidebar-main-item"
-                    [class.active-btn]="selectedProductTypeId === type.id"
-                    (click)="selectProductType(type)"
-                  >
-                    <div class="menu-item-wrapper">
+                <mat-expansion-panel class="transparent-panel" [expanded]="selectedProductTypeId === type.id">
+                  <mat-expansion-panel-header (click)="selectProductType(type)">
+                    <mat-panel-title>
                       <div class="menu-item-left">
                         <mat-icon class="nav-icon">{{ getTypeIcon(type.nome) }}</mat-icon>
                         <span>{{ type.nome }}</span>
                       </div>
-                      <mat-icon class="chevron-right">chevron_right</mat-icon>
-                    </div>
-                  </a>
+                    </mat-panel-title>
+                  </mat-expansion-panel-header>
 
-                  <!-- Submenu Flutuante (Renderizado fora do fluxo, mas dentro do container relativo) -->
-                  @if (getCategoriesForType(type.id).length > 0) {
-                    <div class="flyout-submenu mat-elevation-z4">
-                      <div class="submenu-header">CATEGORIAS: {{ type.nome | uppercase }}</div>
-                      <mat-nav-list class="submenu-list">
-                        @for (cat of getCategoriesForType(type.id); track cat.id) {
-                          <a
-                            mat-list-item
-                            class="submenu-nav-item"
-                            [class.active-menu-item]="selectedCategoryId === cat.id"
-                            (click)="selectCategory(cat); $event.stopPropagation()"
-                          >
-                            <div class="menu-item-left">
-                              <mat-icon class="gold-icon">label</mat-icon>
-                              <span>{{ cat.nome }}</span>
-                            </div>
-                          </a>
-                        }
-                      </mat-nav-list>
-                    </div>
-                  }
-                </div>
+                  <!-- Lista de Categorias dentro do painel expandido -->
+                  <mat-nav-list class="submenu-list">
+                    @for (cat of getCategoriesForType(type.id); track cat.id) {
+                      <a
+                        mat-list-item
+                        class="submenu-nav-item"
+                        [class.active-menu-item]="selectedCategoryId === cat.id"
+                        (click)="selectCategory(cat); $event.stopPropagation()"
+                      >
+                        <span>{{ cat.nome }}</span>
+                      </a>
+                    }
+                  </mat-nav-list>
+                </mat-expansion-panel>
               }
-            </mat-nav-list>
+            </mat-accordion>
           </div>
         </div>
 
@@ -323,7 +308,7 @@ import {
       border-right: 1px solid rgba(212, 175, 55, 0.2);
       display: flex;
       flex-direction: column;
-      overflow: visible !important;
+      overflow-x: hidden !important;
     }
     .sidebar-brand-header {
       display: flex;
@@ -335,16 +320,11 @@ import {
     .gold-icon { color: #D4AF37; }
     .brand-title { font-size: 1.3rem; font-weight: 800; color: #D4AF37; letter-spacing: -0.5px; }
 
-    .sidebar-scroll-content { flex: 1; overflow-y: auto; overflow-x: visible !important; padding: 1rem 0.6rem; }
+    .sidebar-scroll-content { flex: 1; overflow-y: auto; padding: 1rem 0.6rem; }
     .nav-section { display: flex; flex-direction: column; gap: 0.3rem; margin-bottom: 0.8rem; }
     .section-title { font-size: 0.7rem; font-weight: 700; color: #D4AF37; letter-spacing: 1px; padding: 0.4rem 0.6rem; }
 
     .sidebar-nav-list { padding: 0 !important; }
-
-    .sidebar-item-container {
-      position: relative !important;
-      width: 100%;
-    }
 
     .sidebar-main-item {
       display: flex !important;
@@ -367,83 +347,79 @@ import {
       color: #1A1C1E !important;
       font-weight: 700 !important;
     }
-    .sidebar-main-item.active-btn .nav-icon, .sidebar-main-item.active-btn .chevron-right {
+    .sidebar-main-item.active-btn .nav-icon {
       color: #1A1C1E !important;
     }
 
-    /* CSS FLEXBOX OBRIGATÓRIO */
-    .menu-item-wrapper {
-      display: flex !important;
-      justify-content: space-between !important;
-      align-items: center !important;
-      width: 100% !important;
+    /* ACCORDION REFINEMENT */
+    .sidebar-accordion {
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
     }
 
+    /* Remove o fundo branco padrão do painel para mesclar com a sidebar */
+    .transparent-panel {
+      background: transparent !important;
+      box-shadow: none !important;
+      border: none !important;
+      border-radius: 8px !important;
+      overflow: hidden;
+    }
+
+    .transparent-panel .mat-expansion-panel-header {
+      padding: 0 0.8rem !important;
+      height: 44px !important;
+      border-radius: 8px !important;
+      transition: background 0.2s ease !important;
+    }
+    .transparent-panel .mat-expansion-panel-header:hover {
+      background: rgba(212, 175, 55, 0.12) !important;
+    }
+    .transparent-panel .mat-expansion-panel-header.mat-expanded {
+      background: rgba(212, 175, 55, 0.15) !important;
+    }
+
+    .transparent-panel .mat-expansion-indicator::after {
+      color: #D4AF37 !important;
+    }
+
+    /* Ajusta o alinhamento do título */
     .menu-item-left {
       display: flex !important;
       align-items: center !important;
       gap: 12px !important;
+      font-weight: bold;
+      color: #E2E2E6;
     }
 
     .nav-icon { color: #D4AF37; flex-shrink: 0; }
-    .chevron-right { font-size: 1.1rem; width: 1.1rem; height: 1.1rem; color: #64748B !important; margin-left: auto !important; flex-shrink: 0; }
 
-    /* CONFIGURAÇÃO DO SUBMENU PURE CSS ABRINDO EXATAMENTE NA DIREITA */
-    .flyout-submenu {
-      position: absolute !important;
-      top: 0 !important;
-      left: 100% !important;
-      min-width: 250px !important;
-      background-color: #2A2D30 !important;
-      border: 1px solid rgba(212, 175, 55, 0.35) !important;
-      border-radius: 0 12px 12px 12px !important;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 15px rgba(212, 175, 55, 0.15) !important;
-      z-index: 1000 !important;
-      
-      /* Lógica de Hover: Escondido por padrão */
-      opacity: 0;
-      visibility: hidden;
-      pointer-events: none;
-      transform: translateX(-10px);
-      transition: all 0.2s ease-in-out;
+    .submenu-list {
+      padding: 0.2rem 0 !important;
     }
 
-    /* Quando o mouse entra no container, revela o submenu */
-    .sidebar-item-container:hover .flyout-submenu {
-      opacity: 1 !important;
-      visibility: visible !important;
-      pointer-events: auto !important;
-      transform: translateX(0) !important;
-    }
-
-    .submenu-header {
-      padding: 14px 16px;
-      font-size: 11px;
-      font-weight: bold;
-      color: #D4AF37;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      border-bottom: 1px solid rgba(212, 175, 55, 0.2);
-    }
-
-    .submenu-list { padding: 0.4rem 0 !important; }
-
-    .submenu-nav-item {
-      color: #E2E2E6 !important;
+    /* Destaca os itens do submenu (Categorias) */
+    .submenu-list a {
+      color: #D4AF37 !important; /* Dourado */
+      padding-left: 40px !important; /* Recuo para mostrar hierarquia */
+      height: 38px !important;
       font-size: 0.85rem !important;
       font-weight: 600 !important;
-      height: 40px !important;
-      padding: 0 1rem !important;
+      border-radius: 6px !important;
+      margin-bottom: 0.2rem !important;
       transition: all 0.2s ease !important;
       cursor: pointer !important;
     }
-    .submenu-nav-item:hover {
+
+    .submenu-list a:hover {
       background-color: rgba(212, 175, 55, 0.15) !important;
-      color: #D4AF37 !important;
+      color: #ffffff !important;
     }
-    .submenu-nav-item.active-menu-item {
+
+    .submenu-list a.active-menu-item {
       background-color: rgba(212, 175, 55, 0.25) !important;
-      color: #D4AF37 !important;
+      color: #ffffff !important;
       font-weight: 700 !important;
     }
 
