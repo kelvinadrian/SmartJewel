@@ -118,7 +118,7 @@ html, body {
 }
 
 /* Custom Dark & Gold Mat-Menu Panel for CDK Overlay */
-.dark-gold-menu-panel {
+.custom-category-menu, .dark-gold-menu-panel {
   background-color: #2A2D30 !important;
   border: 1px solid rgba(212, 175, 55, 0.35) !important;
   border-radius: 12px !important;
@@ -126,7 +126,7 @@ html, body {
   padding: 0.4rem 0 !important;
 }
 
-.dark-gold-menu-panel .mat-mdc-menu-item {
+.custom-category-menu .mat-mdc-menu-item, .dark-gold-menu-panel .mat-mdc-menu-item {
   color: #E2E2E6 !important;
   min-height: 40px !important;
   height: 40px !important;
@@ -134,12 +134,12 @@ html, body {
   font-weight: 600 !important;
 }
 
-.dark-gold-menu-panel .mat-mdc-menu-item:hover {
+.custom-category-menu .mat-mdc-menu-item:hover, .dark-gold-menu-panel .mat-mdc-menu-item:hover {
   background-color: rgba(212, 175, 55, 0.15) !important;
   color: #D4AF37 !important;
 }
 
-.dark-gold-menu-panel .menu-header-item {
+.custom-category-menu .menu-header-item, .dark-gold-menu-panel .menu-header-item {
   padding: 0.4rem 1rem 0.6rem;
   font-size: 0.75rem;
   font-weight: 700;

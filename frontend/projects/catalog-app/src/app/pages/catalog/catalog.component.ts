@@ -10,6 +10,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatMenuModule, MatMenuTrigger } from '@angular/material/menu';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatSidenav, MatSidenavModule } from '@angular/material/sidenav';
+import { MatListModule } from '@angular/material/list';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -39,6 +40,7 @@ import {
     MatMenuModule,
     MatDividerModule,
     MatSidenavModule,
+    MatListModule,
     MatBadgeModule,
     MatSnackBarModule,
     MatTooltipModule
@@ -54,54 +56,60 @@ import {
         </div>
 
         <div class="sidebar-scroll-content">
-          <!-- SEÇÃO: PRODUTOS (TIPOS DE PRODUTOS COM MAT-MENU NO HOVER EXIBIDO À DIREITA SEM OVERLAP) -->
+          <!-- SEÇÃO: PRODUTOS (TIPOS DE PRODUTOS COM MAT-NAV-LIST E MAT-MENU SEM OVERLAP) -->
           <div class="nav-section">
             <span class="section-title">PRODUTOS</span>
             
-            <button
-              mat-button
-              class="nav-category-btn"
-              [class.active-btn]="!selectedProductTypeId && !selectedCategoryId"
-              (click)="resetFilters()"
-            >
-              <div class="btn-content-left">
-                <mat-icon class="nav-icon">auto_awesome</mat-icon>
-                <span class="type-name-label">Todas as Peças</span>
-              </div>
-            </button>
-
-            @for (type of productTypes; track type.id) {
-              <button
-                mat-button
-                class="nav-category-btn"
-                [class.active-btn]="selectedProductTypeId === type.id"
-                [matMenuTriggerFor]="typeMenu"
-                #typeTrigger="matMenuTrigger"
-                (mouseenter)="openMenu(typeTrigger)"
-                (click)="selectProductType(type)"
+            <mat-nav-list class="sidebar-nav-list">
+              <a
+                mat-list-item
+                class="sidebar-nav-link"
+                [class.active-btn]="!selectedProductTypeId && !selectedCategoryId"
+                (click)="resetFilters()"
               >
-                <div class="btn-content-left">
-                  <mat-icon class="nav-icon">{{ getTypeIcon(type.nome) }}</mat-icon>
-                  <span class="type-name-label">{{ type.nome }}</span>
+                <div class="menu-item-wrapper">
+                  <div class="menu-item-left">
+                    <mat-icon class="nav-icon">auto_awesome</mat-icon>
+                    <span>Todas as Peças</span>
+                  </div>
                 </div>
-                <mat-icon class="chevron-icon">chevron_right</mat-icon>
-              </button>
+              </a>
 
-              <!-- SUBMENU FLUTUANTE RENDERIZADO NO CDK OVERLAY CONTAINER (EXTERNO À DIREITA SEM OVERLAP) -->
-              <mat-menu #typeMenu="matMenu" xPosition="after" [overlapTrigger]="false" class="dark-gold-menu-panel">
-                <div class="menu-header-item">Categorias: {{ type.nome }}</div>
-                @for (cat of getCategoriesForType(type.id); track cat.id) {
-                  <button
-                    mat-menu-item
-                    [class.active-menu-item]="selectedCategoryId === cat.id"
-                    (click)="selectCategory(cat)"
-                  >
-                    <mat-icon class="gold-icon">label</mat-icon>
-                    <span>{{ cat.nome }}</span>
-                  </button>
-                }
-              </mat-menu>
-            }
+              @for (type of productTypes; track type.id) {
+                <a
+                  mat-list-item
+                  class="sidebar-nav-link"
+                  [class.active-btn]="selectedProductTypeId === type.id"
+                  [matMenuTriggerFor]="categoryMenu"
+                  #typeTrigger="matMenuTrigger"
+                  (mouseenter)="openMenu(typeTrigger)"
+                  (click)="selectProductType(type)"
+                >
+                  <div class="menu-item-wrapper">
+                    <div class="menu-item-left">
+                      <mat-icon class="nav-icon">{{ getTypeIcon(type.nome) }}</mat-icon>
+                      <span>{{ type.nome }}</span>
+                    </div>
+                    <mat-icon class="chevron-right">chevron_right</mat-icon>
+                  </div>
+                </a>
+
+                <!-- SUBMENU FLUTUANTE RENDERIZADO NO CDK OVERLAY CONTAINER (EXTERNO À DIREITA SEM OVERLAP) -->
+                <mat-menu #categoryMenu="matMenu" xPosition="after" yPosition="below" [overlapTrigger]="false" class="custom-category-menu">
+                  <div class="menu-header-item">Categorias: {{ type.nome }}</div>
+                  @for (cat of getCategoriesForType(type.id); track cat.id) {
+                    <button
+                      mat-menu-item
+                      [class.active-menu-item]="selectedCategoryId === cat.id"
+                      (click)="selectCategory(cat)"
+                    >
+                      <mat-icon class="gold-icon">label</mat-icon>
+                      <span>{{ cat.nome }}</span>
+                    </button>
+                  }
+                </mat-menu>
+              }
+            </mat-nav-list>
           </div>
         </div>
 
@@ -322,42 +330,48 @@ import {
     .nav-section { display: flex; flex-direction: column; gap: 0.3rem; margin-bottom: 0.8rem; }
     .section-title { font-size: 0.7rem; font-weight: 700; color: #D4AF37; letter-spacing: 1px; padding: 0.4rem 0.6rem; }
 
-    .nav-category-btn {
-      width: 100% !important;
+    .sidebar-nav-list { padding: 0 !important; }
+    .sidebar-nav-link {
       display: flex !important;
       align-items: center !important;
-      justify-content: space-between !important;
-      padding: 0.6rem 0.8rem !important;
-      font-size: 0.9rem;
-      font-weight: 600;
+      border-radius: 8px !important;
+      margin-bottom: 0.3rem !important;
       color: #CBD5E1 !important;
-      border-radius: 8px;
-      transition: all 0.2s ease;
-      text-align: left;
-      box-sizing: border-box !important;
+      height: 44px !important;
+      padding: 0 0.8rem !important;
+      text-decoration: none !important;
+      cursor: pointer !important;
+      transition: all 0.2s ease !important;
     }
-    .btn-content-left {
-      display: flex;
-      align-items: center;
-      gap: 0.6rem;
-      flex: 1;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
+    .sidebar-nav-link:hover {
+      background: rgba(212, 175, 55, 0.12) !important;
+      color: #D4AF37 !important;
     }
-    .type-name-label { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .chevron-icon { font-size: 1.1rem; width: 1.1rem; height: 1.1rem; color: #64748B; margin-left: auto; flex-shrink: 0; }
-    
-    .nav-category-btn:hover { background: rgba(212, 175, 55, 0.12) !important; color: #D4AF37 !important; }
-    .nav-category-btn:hover .chevron-icon { color: #D4AF37; }
-
-    .nav-category-btn.active-btn {
+    .sidebar-nav-link.active-btn {
       background: linear-gradient(135deg, #D4AF37 0%, #B28B29 100%) !important;
       color: #1A1C1E !important;
-      font-weight: 700;
+      font-weight: 700 !important;
     }
-    .nav-category-btn.active-btn .nav-icon, .nav-category-btn.active-btn .chevron-icon { color: #1A1C1E !important; }
+    .sidebar-nav-link.active-btn .nav-icon, .sidebar-nav-link.active-btn .chevron-right {
+      color: #1A1C1E !important;
+    }
+
+    /* CSS FLEXBOX ESTRITO OBRIGATÓRIO */
+    .menu-item-wrapper {
+      display: flex !important;
+      justify-content: space-between !important;
+      align-items: center !important;
+      width: 100% !important;
+    }
+
+    .menu-item-left {
+      display: flex !important;
+      align-items: center !important;
+      gap: 12px !important;
+    }
+
     .nav-icon { color: #D4AF37; flex-shrink: 0; }
+    .chevron-right { font-size: 1.1rem; width: 1.1rem; height: 1.1rem; color: #64748B !important; margin-left: auto !important; flex-shrink: 0; }
 
     .sidebar-footer { padding: 1rem; border-top: 1px solid rgba(212, 175, 55, 0.15); font-size: 0.75rem; color: #64748B; text-align: center; }
 
