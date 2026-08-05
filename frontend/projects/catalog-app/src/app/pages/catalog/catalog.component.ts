@@ -54,7 +54,7 @@ import {
         </div>
 
         <div class="sidebar-scroll-content">
-          <!-- SEÇÃO: PRODUTOS (TIPOS DE PRODUTOS COM MAT-MENU NO HOVER EXIBIDO À DIREITA) -->
+          <!-- SEÇÃO: PRODUTOS (TIPOS DE PRODUTOS COM MAT-MENU NO HOVER EXIBIDO À DIREITA SEM OVERLAP) -->
           <div class="nav-section">
             <span class="section-title">PRODUTOS</span>
             
@@ -84,13 +84,11 @@ import {
                   <mat-icon class="nav-icon">{{ getTypeIcon(type.nome) }}</mat-icon>
                   <span class="type-name-label">{{ type.nome }}</span>
                 </div>
-                @if (getCategoriesForType(type.id).length > 0) {
-                  <mat-icon class="chevron-icon">chevron_right</mat-icon>
-                }
+                <mat-icon class="chevron-icon">chevron_right</mat-icon>
               </button>
 
-              <!-- SUBMENU FLUTUANTE DE CATEGORIAS RENDERIZADO NO CDK OVERLAY CONTAINER (FLUTUA À DIREITA DO MENU) -->
-              <mat-menu #typeMenu="matMenu" xPosition="after" class="dark-gold-menu-panel">
+              <!-- SUBMENU FLUTUANTE RENDERIZADO NO CDK OVERLAY CONTAINER (EXTERNO À DIREITA SEM OVERLAP) -->
+              <mat-menu #typeMenu="matMenu" xPosition="after" [overlapTrigger]="false" class="dark-gold-menu-panel">
                 <div class="menu-header-item">Categorias: {{ type.nome }}</div>
                 @for (cat of getCategoriesForType(type.id); track cat.id) {
                   <button
