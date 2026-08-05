@@ -253,16 +253,15 @@ import {
                       <h3 class="product-title">{{ product.nome }}</h3>
                       <span class="product-sku">SKU: {{ product.sku }}</span>
 
-                      <div class="card-footer">
-                        <div class="price-wrapper">
-                          <span class="price-label">Preço</span>
+                      <div class="product-card-footer">
+                        <div class="price-block">
+                          <span class="price-label">PREÇO</span>
                           <span class="price-value">{{ product.preco | currency:'BRL':'symbol':'1.2-2' }}</span>
                         </div>
 
                         <button
-                          mat-raised-button
-                          color="primary"
-                          class="add-to-cart-btn"
+                          mat-flat-button
+                          class="add-button"
                           [disabled]="product.quantidadeEstoque <= 0 || isAdding[product.id]"
                           (click)="addToCart(product, cartSidenav)"
                         >
@@ -498,11 +497,44 @@ import {
     .badge-material { background: rgba(46, 139, 87, 0.2); color: #2E8B57; border: 1px solid rgba(46, 139, 87, 0.4); }
     .product-title { font-size: 1.05rem; font-weight: 700; color: #E2E2E6; margin: 0 0 0.3rem; line-height: 1.3; }
     .product-sku { font-size: 0.75rem; color: #64748B; font-family: monospace; margin-bottom: 1rem; }
-    .card-footer { margin-top: auto; display: flex; align-items: center; justify-content: space-between; padding-top: 0.8rem; border-top: 1px solid rgba(255,255,255,0.08); }
-    .price-label { font-size: 0.7rem; color: #94A3B8; text-transform: uppercase; }
-    .price-value { font-size: 1.25rem; font-weight: 700; color: #D4AF37; }
-    .add-to-cart-btn { background: linear-gradient(135deg, #D4AF37 0%, #B28B29 100%) !important; color: #1A1C1E !important; font-weight: 700; height: 38px; border-radius: 8px; font-size: 0.8rem; }
     
+    /* NOVO RODAPÉ DO CARTÃO (PRODUCT-CARD-FOOTER) */
+    .product-card-footer {
+      display: flex !important;
+      justify-content: space-between !important;
+      align-items: center !important;
+      padding: 16px !important;
+      border-top: 1px solid #333 !important;
+      margin-top: auto; /* Empurra o rodapé pro fundo do card */
+    }
+
+    .price-block {
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: flex-start !important;
+    }
+
+    .price-label {
+      font-size: 10px !important;
+      color: #aaa !important;
+      text-transform: uppercase !important;
+      line-height: 1 !important;
+      margin-bottom: 4px !important;
+    }
+
+    .price-value {
+      font-size: 18px !important;
+      font-weight: bold !important;
+      color: #D4AF37 !important;
+      line-height: 1 !important;
+    }
+
+    .add-button {
+      background-color: #D4AF37 !important;
+      color: #1A1C1E !important;
+      font-weight: bold !important;
+    }
+
     /* PAGINADOR (CONTAINER SEPARADO COM MARGEM E SEM SOBREPOSIÇÃO) */
     .pagination-container { margin-top: 2rem; border-radius: 12px; overflow: hidden; background: #2A2D30; border: 1px solid rgba(212, 175, 55, 0.2); }
 
