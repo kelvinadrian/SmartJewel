@@ -46,7 +46,7 @@ import {
   template: `
     <mat-sidenav-container class="catalog-sidenav-container">
       
-      <!-- 1. BARRA LATERAL ESQUERDA FIXA: NAVEGAÇÃO DE TIPOS E CATEGORIAS (START / SIDE / OPENED) -->
+      <!-- 1. BARRA LATERAL ESQUERDA FIXA: NAVEGAÇÃO DE PRODUTOS COM SUBMENU NO HOVER (START / SIDE / OPENED) -->
       <mat-sidenav #leftSidenav position="start" mode="side" opened class="left-nav-sidenav">
         <div class="sidebar-brand-header">
           <mat-icon class="gold-icon">diamond</mat-icon>
@@ -54,9 +54,9 @@ import {
         </div>
 
         <div class="sidebar-scroll-content">
-          <!-- SEÇÃO: TIPOS DE PRODUTOS COM MAT-MENU NO HOVER (CDK OVERLAY) -->
+          <!-- SEÇÃO: PRODUTOS (TIPOS DE PRODUTOS COM MAT-MENU NO HOVER EXIBIDO À DIREITA) -->
           <div class="nav-section">
-            <span class="section-title">TIPOS DE JOIAS</span>
+            <span class="section-title">PRODUTOS</span>
             
             <button
               mat-button
@@ -64,8 +64,10 @@ import {
               [class.active-btn]="!selectedProductTypeId && !selectedCategoryId"
               (click)="resetFilters()"
             >
-              <mat-icon class="nav-icon">auto_awesome</mat-icon>
-              <span>Todas as Peças</span>
+              <div class="btn-content-left">
+                <mat-icon class="nav-icon">auto_awesome</mat-icon>
+                <span class="type-name-label">Todas as Peças</span>
+              </div>
             </button>
 
             @for (type of productTypes; track type.id) {
@@ -78,14 +80,16 @@ import {
                 (mouseenter)="openMenu(typeTrigger)"
                 (click)="selectProductType(type)"
               >
-                <mat-icon class="nav-icon">{{ getTypeIcon(type.nome) }}</mat-icon>
-                <span class="type-name-label">{{ type.nome }}</span>
+                <div class="btn-content-left">
+                  <mat-icon class="nav-icon">{{ getTypeIcon(type.nome) }}</mat-icon>
+                  <span class="type-name-label">{{ type.nome }}</span>
+                </div>
                 @if (getCategoriesForType(type.id).length > 0) {
                   <mat-icon class="chevron-icon">chevron_right</mat-icon>
                 }
               </button>
 
-              <!-- SUBMENU FLUTUANTE RENDERIZADO NO CDK OVERLAY CONTAINER (SEM SCROLL) -->
+              <!-- SUBMENU FLUTUANTE DE CATEGORIAS RENDERIZADO NO CDK OVERLAY CONTAINER (FLUTUA À DIREITA DO MENU) -->
               <mat-menu #typeMenu="matMenu" xPosition="after" class="dark-gold-menu-panel">
                 <div class="menu-header-item">Categorias: {{ type.nome }}</div>
                 @for (cat of getCategoriesForType(type.id); track cat.id) {
@@ -99,25 +103,6 @@ import {
                   </button>
                 }
               </mat-menu>
-            }
-          </div>
-
-          <mat-divider class="sidebar-divider"></mat-divider>
-
-          <!-- SEÇÃO: TODAS AS CATEGORIAS -->
-          <div class="nav-section">
-            <span class="section-title">CATEGORIAS</span>
-            
-            @for (cat of categories; track cat.id) {
-              <button
-                mat-button
-                class="nav-category-btn"
-                [class.active-btn]="selectedCategoryId === cat.id"
-                (click)="selectCategory(cat)"
-              >
-                <mat-icon class="nav-icon">label</mat-icon>
-                <span>{{ cat.nome }}</span>
-              </button>
             }
           </div>
         </div>
@@ -338,14 +323,12 @@ import {
     .sidebar-scroll-content { flex: 1; overflow-y: auto; padding: 1rem 0.6rem; }
     .nav-section { display: flex; flex-direction: column; gap: 0.3rem; margin-bottom: 0.8rem; }
     .section-title { font-size: 0.7rem; font-weight: 700; color: #D4AF37; letter-spacing: 1px; padding: 0.4rem 0.6rem; }
-    .sidebar-divider { border-color: rgba(212, 175, 55, 0.15) !important; margin: 0.8rem 0 !important; }
 
     .nav-category-btn {
-      width: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: flex-start;
-      gap: 0.6rem;
+      width: 100% !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: space-between !important;
       padding: 0.6rem 0.8rem !important;
       font-size: 0.9rem;
       font-weight: 600;
@@ -353,9 +336,20 @@ import {
       border-radius: 8px;
       transition: all 0.2s ease;
       text-align: left;
+      box-sizing: border-box !important;
     }
-    .type-name-label { flex: 1; }
-    .chevron-icon { font-size: 1.1rem; width: 1.1rem; height: 1.1rem; color: #64748B; margin-left: auto; }
+    .btn-content-left {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .type-name-label { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .chevron-icon { font-size: 1.1rem; width: 1.1rem; height: 1.1rem; color: #64748B; margin-left: auto; flex-shrink: 0; }
+    
     .nav-category-btn:hover { background: rgba(212, 175, 55, 0.12) !important; color: #D4AF37 !important; }
     .nav-category-btn:hover .chevron-icon { color: #D4AF37; }
 
@@ -365,7 +359,7 @@ import {
       font-weight: 700;
     }
     .nav-category-btn.active-btn .nav-icon, .nav-category-btn.active-btn .chevron-icon { color: #1A1C1E !important; }
-    .nav-icon { color: #D4AF37; }
+    .nav-icon { color: #D4AF37; flex-shrink: 0; }
 
     .sidebar-footer { padding: 1rem; border-top: 1px solid rgba(212, 175, 55, 0.15); font-size: 0.75rem; color: #64748B; text-align: center; }
 
@@ -598,7 +592,7 @@ export class CatalogComponent implements OnInit {
   updateActiveFilterLabel(): void {
     if (this.selectedProductTypeId) {
       const type = this.productTypes.find(t => t.id === this.selectedProductTypeId);
-      this.activeFilterLabel = type ? `Tipo: ${type.nome}` : 'Tipo Selecionado';
+      this.activeFilterLabel = type ? `Produto: ${type.nome}` : 'Produto Selecionado';
     } else if (this.selectedCategoryId) {
       const cat = this.categories.find(c => c.id === this.selectedCategoryId);
       this.activeFilterLabel = cat ? `Categoria: ${cat.nome}` : 'Categoria Selecionada';
