@@ -116,3 +116,36 @@ html, body {
   --mdc-snackbar-container-color: #2A2D30;
   --mdc-snackbar-supporting-text-color: #E2E2E6;
 }
+
+/* Custom Dark & Gold Mat-Menu Panel for CDK Overlay */
+.dark-gold-menu-panel {
+  background-color: #2A2D30 !important;
+  border: 1px solid rgba(212, 175, 55, 0.35) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 15px rgba(212, 175, 55, 0.15) !important;
+  padding: 0.4rem 0 !important;
+}
+
+.dark-gold-menu-panel .mat-mdc-menu-item {
+  color: #E2E2E6 !important;
+  min-height: 40px !important;
+  height: 40px !important;
+  font-size: 0.85rem !important;
+  font-weight: 600 !important;
+}
+
+.dark-gold-menu-panel .mat-mdc-menu-item:hover {
+  background-color: rgba(212, 175, 55, 0.15) !important;
+  color: #D4AF37 !important;
+}
+
+.dark-gold-menu-panel .menu-header-item {
+  padding: 0.4rem 1rem 0.6rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #D4AF37;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+  margin-bottom: 0.3rem;
+}

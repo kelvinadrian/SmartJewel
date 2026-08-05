@@ -7,7 +7,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatMenuModule } from '@angular/material/menu';
+import { MatMenuModule, MatMenuTrigger } from '@angular/material/menu';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatSidenav, MatSidenavModule } from '@angular/material/sidenav';
 import { MatBadgeModule } from '@angular/material/badge';
@@ -54,7 +54,7 @@ import {
         </div>
 
         <div class="sidebar-scroll-content">
-          <!-- SEÇÃO: TIPOS DE PRODUTOS COM SUBMENU FLUTUANTE DE CATEGORIAS NO HOVER -->
+          <!-- SEÇÃO: TIPOS DE PRODUTOS COM MAT-MENU NO HOVER (CDK OVERLAY) -->
           <div class="nav-section">
             <span class="section-title">TIPOS DE JOIAS</span>
             
@@ -69,46 +69,36 @@ import {
             </button>
 
             @for (type of productTypes; track type.id) {
-              <div
-                class="nav-type-item-wrapper"
-                (mouseenter)="hoveredTypeId = type.id"
-                (mouseleave)="hoveredTypeId = null"
+              <button
+                mat-button
+                class="nav-category-btn"
+                [class.active-btn]="selectedProductTypeId === type.id"
+                [matMenuTriggerFor]="typeMenu"
+                #typeTrigger="matMenuTrigger"
+                (mouseenter)="openMenu(typeTrigger)"
+                (click)="selectProductType(type)"
               >
-                <button
-                  mat-button
-                  class="nav-category-btn"
-                  [class.active-btn]="selectedProductTypeId === type.id"
-                  (click)="selectProductType(type)"
-                >
-                  <mat-icon class="nav-icon">{{ getTypeIcon(type.nome) }}</mat-icon>
-                  <span class="type-name-label">{{ type.nome }}</span>
-                  @if (getCategoriesForType(type.id).length > 0) {
-                    <mat-icon class="chevron-icon">chevron_right</mat-icon>
-                  }
-                </button>
-
-                <!-- SUBMENU FLUTUANTE DE CATEGORIAS ANINHADAS MOSTRADO AO PASSAR O MOUSE -->
-                @if (hoveredTypeId === type.id && getCategoriesForType(type.id).length > 0) {
-                  <div class="nested-flyout-menu glass-card">
-                    <div class="flyout-header">
-                      <span class="flyout-title">Categorias: {{ type.nome }}</span>
-                    </div>
-                    <div class="flyout-body">
-                      @for (cat of getCategoriesForType(type.id); track cat.id) {
-                        <button
-                          mat-button
-                          class="flyout-category-btn"
-                          [class.active-btn]="selectedCategoryId === cat.id"
-                          (click)="selectCategory(cat)"
-                        >
-                          <mat-icon class="nav-icon">label</mat-icon>
-                          <span>{{ cat.nome }}</span>
-                        </button>
-                      }
-                    </div>
-                  </div>
+                <mat-icon class="nav-icon">{{ getTypeIcon(type.nome) }}</mat-icon>
+                <span class="type-name-label">{{ type.nome }}</span>
+                @if (getCategoriesForType(type.id).length > 0) {
+                  <mat-icon class="chevron-icon">chevron_right</mat-icon>
                 }
-              </div>
+              </button>
+
+              <!-- SUBMENU FLUTUANTE RENDERIZADO NO CDK OVERLAY CONTAINER (SEM SCROLL) -->
+              <mat-menu #typeMenu="matMenu" xPosition="after" class="dark-gold-menu-panel">
+                <div class="menu-header-item">Categorias: {{ type.nome }}</div>
+                @for (cat of getCategoriesForType(type.id); track cat.id) {
+                  <button
+                    mat-menu-item
+                    [class.active-menu-item]="selectedCategoryId === cat.id"
+                    (click)="selectCategory(cat)"
+                  >
+                    <mat-icon class="gold-icon">label</mat-icon>
+                    <span>{{ cat.nome }}</span>
+                  </button>
+                }
+              </mat-menu>
             }
           </div>
 
@@ -333,6 +323,7 @@ import {
       border-right: 1px solid rgba(212, 175, 55, 0.2);
       display: flex;
       flex-direction: column;
+      overflow-x: hidden !important;
     }
     .sidebar-brand-header {
       display: flex;
@@ -348,8 +339,6 @@ import {
     .nav-section { display: flex; flex-direction: column; gap: 0.3rem; margin-bottom: 0.8rem; }
     .section-title { font-size: 0.7rem; font-weight: 700; color: #D4AF37; letter-spacing: 1px; padding: 0.4rem 0.6rem; }
     .sidebar-divider { border-color: rgba(212, 175, 55, 0.15) !important; margin: 0.8rem 0 !important; }
-
-    .nav-type-item-wrapper { position: relative; width: 100%; }
 
     .nav-category-btn {
       width: 100%;
@@ -377,48 +366,6 @@ import {
     }
     .nav-category-btn.active-btn .nav-icon, .nav-category-btn.active-btn .chevron-icon { color: #1A1C1E !important; }
     .nav-icon { color: #D4AF37; }
-
-    /* SUBMENU FLUTUANTE DE CATEGORIAS ANINHADAS (NO HOVER) */
-    .nested-flyout-menu {
-      position: absolute;
-      left: 235px;
-      top: 0;
-      z-index: 1000;
-      min-width: 210px;
-      background: #2A2D30;
-      border: 1px solid rgba(212, 175, 55, 0.35);
-      border-radius: 12px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 15px rgba(212, 175, 55, 0.15);
-      padding: 0.6rem;
-      animation: fadeInFlyout 0.2s ease;
-    }
-    @keyframes fadeInFlyout {
-      from { opacity: 0; transform: translateX(-6px); }
-      to { opacity: 1; transform: translateX(0); }
-    }
-    .flyout-header { padding: 0.3rem 0.6rem 0.5rem; border-bottom: 1px solid rgba(212, 175, 55, 0.2); margin-bottom: 0.4rem; }
-    .flyout-title { font-size: 0.75rem; font-weight: 700; color: #D4AF37; text-transform: uppercase; letter-spacing: 0.5px; }
-    .flyout-body { display: flex; flex-direction: column; gap: 0.2rem; }
-    .flyout-category-btn {
-      width: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: flex-start;
-      gap: 0.5rem;
-      padding: 0.5rem 0.7rem !important;
-      font-size: 0.85rem;
-      font-weight: 600;
-      color: #E2E2E6 !important;
-      border-radius: 6px;
-      transition: all 0.2s ease;
-      text-align: left;
-    }
-    .flyout-category-btn:hover { background: rgba(212, 175, 55, 0.15) !important; color: #D4AF37 !important; }
-    .flyout-category-btn.active-btn {
-      background: linear-gradient(135deg, #D4AF37 0%, #B28B29 100%) !important;
-      color: #1A1C1E !important;
-      font-weight: 700;
-    }
 
     .sidebar-footer { padding: 1rem; border-top: 1px solid rgba(212, 175, 55, 0.15); font-size: 0.75rem; color: #64748B; text-align: center; }
 
@@ -508,8 +455,6 @@ export class CatalogComponent implements OnInit {
   isAdding: Record<string, boolean> = {};
   imageErrors: Record<string, boolean> = {};
 
-  hoveredTypeId: string | null = null;
-
   selectedCategoryId: string | null = null;
   selectedProductTypeId: string | null = null;
   selectedMaterialColorId: string | null = null;
@@ -543,6 +488,12 @@ export class CatalogComponent implements OnInit {
 
   getCategoriesForType(typeId: string): Category[] {
     return this.categories.filter(c => c.productTypeId === typeId);
+  }
+
+  openMenu(trigger: MatMenuTrigger): void {
+    if (trigger && !trigger.menuOpen) {
+      trigger.openMenu();
+    }
   }
 
   addToCart(product: Product, cartSidenav: MatSidenav): void {
@@ -627,7 +578,6 @@ export class CatalogComponent implements OnInit {
   }
 
   selectProductType(type: ProductType): void {
-    this.hoveredTypeId = null;
     this.pageIndex = 0;
     this.router.navigate([], {
       relativeTo: this.route,
@@ -637,7 +587,6 @@ export class CatalogComponent implements OnInit {
   }
 
   selectCategory(cat: Category): void {
-    this.hoveredTypeId = null;
     this.pageIndex = 0;
     this.router.navigate([], {
       relativeTo: this.route,
@@ -665,7 +614,6 @@ export class CatalogComponent implements OnInit {
   }
 
   resetFilters(): void {
-    this.hoveredTypeId = null;
     this.selectedProductTypeId = null;
     this.selectedCategoryId = null;
     this.selectedMaterialColorId = null;
